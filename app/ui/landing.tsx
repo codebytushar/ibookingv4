@@ -17,7 +17,7 @@ export default function Landing() {
                     <p className="text-lg md:text-xl mb-8 text-white/90">
                         Effortless room booking and satsangi management for every shivir.
                     </p>
-                    <Link href="/dashboard/admin" className="inline-flex items-center">
+                    <Link href="/dashboard" className="inline-flex items-center">
                         <Button size="lg" className="gap-2 bg-white text-indigo-600 hover:bg-indigo-100">
                             Get Started <ArrowRight size={18} />
                         </Button>

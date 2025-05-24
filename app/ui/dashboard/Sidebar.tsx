@@ -10,22 +10,22 @@ export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
-    { name: 'Shivirs', href: '/shivirs/new' },
-    { name: 'Satsangis', href: '/satsangis/new' },
-    { name: 'Room Properties', href: '/room_properties/new' },
-    { name: 'Room Types', href: '/room_types/new' },
-    { name: 'Rooms', href: '/rooms/new' },
-    { name: 'Allocations', href: '/allocations/new' },
-    { name: 'Checked In', href: '/checked_in/new' },
-    { name: 'Checked Out', href: '/checked_out/new' },
-    { name: 'Import Shivirs', href: '/shivirs/import' },
-    { name: 'Import Satsangis', href: '/satsangis/import' },
-    { name: 'Import Room Properties', href: '/room_properties/import' },
-    { name: 'Import Room Types', href: '/room_types/import' },
-    { name: 'Import Rooms', href: '/rooms/import' },
-    { name: 'Import Allocations', href: '/allocations/import' },
-    { name: 'Import Checked In', href: '/checked_in/import' },
-    { name: 'Import Checked Out', href: '/checked_out/import' },
+    { name: 'Shivirs', href: '/dashboard/admin/shivirs' },
+    // { name: 'Satsangis', href: '/satsangis/new' },
+    { name: 'Room Properties', href: '/dashboard/admin/room_properties' },
+    // { name: 'Room Types', href: '/room_types/new' },
+    // { name: 'Rooms', href: '/rooms/new' },
+    // { name: 'Allocations', href: '/allocations/new' },
+    // { name: 'Checked In', href: '/checked_in/new' },
+    // { name: 'Checked Out', href: '/checked_out/new' },
+    // { name: 'Import Shivirs', href: '/shivirs/import' },
+    // { name: 'Import Satsangis', href: '/satsangis/import' },
+    // { name: 'Import Room Properties', href: '/room_properties/import' },
+    // { name: 'Import Room Types', href: '/room_types/import' },
+    // { name: 'Import Rooms', href: '/rooms/import' },
+    // { name: 'Import Allocations', href: '/allocations/import' },
+    // { name: 'Import Checked In', href: '/checked_in/import' },
+    // { name: 'Import Checked Out', href: '/checked_out/import' },
   ];
 
   return (

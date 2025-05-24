@@ -1,17 +1,19 @@
 // app/(protected)/dashboard/page.tsx
-'use client';
 
 
+
+import { auth } from '@/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-export default function Dashboard() {
+export default async function AdminDashboard() {
+  const session = await auth();
 
   return (
     <div className="space-y-6">
       <Card className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-indigo-800">
-            Welcome, 
+            Welcome, {session?.user?.name || 'Admin'}!
           </CardTitle>
         </CardHeader>
         <CardContent>
