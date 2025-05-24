@@ -62,7 +62,7 @@ export default function LoginForm() {
             </div>
           </div>
         </div>
-        <Button className="mt-4 w-full bg-rose-600 hover:bg-rose-500" aria-disabled={isPending}>
+        <Button className="mt-4 w-full bg-indigo-600 hover:bg-indigo-500" aria-disabled={isPending}>
           Log in <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
         </Button>
         <div className="flex h-8 items-end space-x-1">

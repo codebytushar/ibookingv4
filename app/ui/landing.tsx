@@ -1,129 +1,67 @@
 import { SparklesIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import React from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export default function Landing() {
     return (
         <>
-            <main>
-                <div className="flex h-20 shrink-0 items-end  bg-zinc-100 p-4 md:h-14">
-                    <div className="w-full h-full px-4 flex justify-between items-center space-x-4">
-                        <Link href="/" legacyBehavior>
-                            <a className="flex items-center space-x-1">
-                                <SparklesIcon className="shrink-0 w-8 h-8 text-rose-500" />
-                                <span className="text-xl font-semibold tracking-wide">
-                                    i<span className="text-rose-600">Hundred</span>
-                                </span>
-                            </a>
-                        </Link>
-                    </div>
-                  
-                    <div className="w-full h-full px-4 flex justify-end items-center space-x-4">
-                        <Link href="/login" className="ml-4 px-4 py-1 rounded-md bg-rose-600 hover:bg-rose-500 focus:outline-none focus:ring-4 focus:ring-rose-500 focus:ring-opacity-50 text-white transition" >
-                                    Log in
-                        </Link>
-                    </div>
-                    {/* <AcmeLogo /> */}
-                </div>
-                <div className="relative pt-16 pb-32 flex content-center items-center justify-center min-h-screen-75">
-                    <div
-                        className="absolute top-0 w-full h-full bg-center bg-cover bg"
-                        style={{
-                            backgroundImage:
-                                "url('https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1267&q=80')",
-                        }}
-                    >
-                        <span
-                            id="blackOverlay"
-                            className="w-full h-full absolute opacity-75 bg-black"
-                        ></span>
-                    </div>
-                    <div className="container relative mx-auto">
-                        <div className="items-center flex flex-wrap">
-                            <div className="w-full lg:w-6/12 px-4 ml-auto mr-auto text-center">
-                                <div className="pr-12 space-y-3" >
-                                    <h1 className="text-white font-semibold text-2xl">
-                                        Sarvajanik College of Engineering & Technology, Surat.
-                                    </h1>
-                                    <p className="text-white font-semibold text-1xl">
-
-                                    </p>
-                                    <span className="text-s  font-semibold inline-block py-1 px-2 rounded text-maroon-600 bg-orange-200 last:mr-0 mr-1">
-                                        <a href="https://ihundred-doc.triple5.in/" rel="noreferrer" target="_blank">User Guide</a>
-                                    </span>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div
-                        className="top-auto bottom-0 left-0 right-0 w-full absolute pointer-events-none overflow-hidden h-16"
-                        style={{ transform: "translateZ(0)" }}
-                    >
-                        <svg
-                            className="absolute bottom-0 overflow-hidden"
-                            xmlns="http://www.w3.org/2000/svg"
-                            preserveAspectRatio="none"
-                            version="1.1"
-                            viewBox="0 0 2560 100"
-                            x="0"
-                            y="0"
-                        >
-                            <polygon
-                                className="text-blueGray-200 fill-current"
-                                points="2560 0 2560 100 0 100"
-                            ></polygon>
-                        </svg>
-                    </div>
-                </div>
-
-                <section className="pb-20 bg-blueGray-200 -mt-24">
-                    <div className="container mx-auto px-4">
-                        <div className="flex flex-wrap">
-                            <div className="lg:pt-12 pt-6 w-full md:w-4/12 px-4 text-center">
-                                <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-8 shadow-lg rounded-lg">
-                                    <div className="px-4 py-5 flex-auto">
-                                        <div className="text-white p-3 text-center inline-flex items-center justify-center w-12 h-12 mb-5 shadow-lg rounded-full bg-red-400">
-                                            <i className="fas fa-award"></i>
-                                        </div>
-                                        <h6 className="text-xl font-semibold">Inclusive</h6>
-                                        <p className="mt-2 mb-4 text-blueGray-500">
-
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="w-full md:w-4/12 px-4 text-center">
-                                <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-8 shadow-lg rounded-lg">
-                                    <div className="px-4 py-5 flex-auto">
-                                        <div className="text-white p-3 text-center inline-flex items-center justify-center w-12 h-12 mb-5 shadow-lg rounded-full bg-lightBlue-400">
-                                            <i className="fas fa-retweet"></i>
-                                        </div>
-                                        <h6 className="text-xl font-semibold">Innovative</h6>
-                                        <p className="mt-2 mb-4 text-blueGray-500">
-
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="pt-6 w-full md:w-4/12 px-4 text-center">
-                                <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-8 shadow-lg rounded-lg">
-                                    <div className="px-4 py-5 flex-auto">
-                                        <div className="text-white p-3 text-center inline-flex items-center justify-center w-12 h-12 mb-5 shadow-lg rounded-full bg-emerald-400">
-                                            <i className="fas fa-fingerprint"></i>
-                                        </div>
-                                        <h6 className="text-xl font-semibold">Integrated</h6>
-                                        <p className="mt-2 mb-4 text-blueGray-500">
-
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <main className="min-h-screen text-gray-800">
+                {/* Hero Section */}
+                <section className="text-center px-4 py-24 max-w-4xl mx-auto bg-gradient-to-r from-indigo-600/90 to-purple-600/90 backdrop-blur-md rounded-xl shadow-lg mt-8">
+                    <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6 text-white">
+                        Welcome to Golokdham IBooking
+                    </h1>
+                    <p className="text-lg md:text-xl mb-8 text-white/90">
+                        Effortless room booking and satsangi management for every shivir.
+                    </p>
+                    <Link href="/dashboard">
+                        <Button size="lg" className="gap-2 bg-white text-indigo-600 hover:bg-indigo-100">
+                            Get Started <ArrowRight size={18} />
+                        </Button>
+                    </Link>
                 </section>
+
+                {/* Add vertical space between sections */}
+                <div className="h-16" />
+
+                {/* Features Section */}
+                <section className="grid grid-cols-1 md:grid-cols-3 gap-6 px-6 pb-24 max-w-6xl mx-auto">
+                    {[
+                        {
+                            title: "Room Allocation",
+                            desc: "Manage room properties, types and occupancy with ease.",
+                        },
+                        {
+                            title: "Satsangi Management",
+                            desc: "Track seva, preferences, and check-in/out status.",
+                        },
+                        {
+                            title: "Shivir Planning",
+                            desc: "Organize events with full visibility and control.",
+                        },
+                    ].map((feat) => (
+                        <Card
+                            key={feat.title}
+                            className="rounded-2xl shadow-lg bg-gradient-to-br from-white to-indigo-100/80 border-none"
+                        >
+                            <CardContent className="p-6">
+                                <h3 className="text-xl font-semibold mb-2 text-indigo-800">{feat.title}</h3>
+                                <p className="text-gray-600">{feat.desc}</p>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </section>
+
+                {/* Add vertical space before footer */}
+                <div className="h-16" />
+
+                {/* Footer */}
+                <footer className="text-center text-sm text-white py-8 bg-indigo-600/90 backdrop-blur-md">
+                    © {new Date().getFullYear()} Golokdham IBooking. All rights reserved.
+                </footer>
             </main>
             {/* <Footer /> */}
         </>

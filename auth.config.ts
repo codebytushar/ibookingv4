@@ -20,8 +20,9 @@ export const authConfig = {
       return session;
     },
     authorized({ auth, request: { nextUrl } }) {
+      const isOnLanding = nextUrl.pathname == '/';
+      if(isOnLanding) return true;
       const isLoggedIn = !!auth?.user;
-      console.log('auth', auth?.user);
       if(!isLoggedIn) {return false;}
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
       const isOnAdminDashboard = nextUrl.pathname.startsWith('/dashboard/admin');
@@ -29,10 +30,10 @@ export const authConfig = {
       const isOnStaffDashboard = nextUrl.pathname.startsWith('/dashboard/staff');
       const isOnStudentDashboard = nextUrl.pathname.startsWith('/dashboard/students');
       
-      if (isOnAdminDashboard && auth.user.role !== 'admin') return false;
-      if (isOnHodDashboard && auth.user.role !== 'hod') return false;
-      if (isOnStaffDashboard && auth.user.role !== 'staff') return false;
-      if (isOnStudentDashboard && auth.user.role !== 'student') return false;
+      // if (isOnAdminDashboard && auth.user.role !== 'admin') return false;
+      // if (isOnHodDashboard && auth.user.role !== 'hod') return false;
+      // if (isOnStaffDashboard && auth.user.role !== 'staff') return false;
+      // if (isOnStudentDashboard && auth.user.role !== 'student') return false;
       if (isOnDashboard) return true;
       
       return Response.redirect(new URL('/dashboard', nextUrl));
