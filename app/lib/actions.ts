@@ -70,7 +70,7 @@ export async function deleteInvoice(id: string) {
   ) {
     try {
       await signIn('credentials', formData);
-    } catch (error) {
+redirect('/dashboard');    } catch (error) {
       if (error instanceof AuthError) {
         switch (error.type) {
           case 'CredentialsSignin':
