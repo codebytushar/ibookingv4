@@ -3,16 +3,16 @@
 import { useState } from 'react';
 import Papa from 'papaparse';
 import toast from 'react-hot-toast';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
-export default function SatsangiesImport({ shivirs }: { shivirs: { id: string; occasion: string }[] }) {
+export default function RoomsImport({ roomTypes }: { roomTypes: { id: string; description: string }[] }) {
   const [csvData, setCsvData] = useState<any[]>([]);
-  const [selectedShivirId, setSelectedShivirId] = useState<string>('');
+  const [selectedRoomTypeId, setSelectedRoomTypeId] = useState<string>('');
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -23,9 +23,9 @@ export default function SatsangiesImport({ shivirs }: { shivirs: { id: string; o
       skipEmptyLines: true,
       complete: (results) => {
         const rows = results.data as any[];
-        const invalid = rows.some((row) => !row.name || !row.city);
+        const invalid = rows.some((row) => !row.room_no || !row.floor || !row.status);
         if (invalid) {
-          toast.error('Missing mandatory fields (name, city)');
+          toast.error('Missing required fields (room_no, floor, status)');
           return;
         }
         setCsvData(rows);
@@ -35,42 +35,42 @@ export default function SatsangiesImport({ shivirs }: { shivirs: { id: string; o
   };
 
   const handleImport = async () => {
-    if (!selectedShivirId) {
-      toast.error('Please select a Shivir');
+    if (!selectedRoomTypeId) {
+      toast.error('Please select a Room Type');
       return;
     }
 
     const enrichedData = csvData.map((row) => ({
       ...row,
-      shivir_id: selectedShivirId,
+      room_type_id: selectedRoomTypeId,
     }));
 
-    const res = await fetch('/api/satsangies/import', {
+    const res = await fetch('/api/rooms/import', {
       method: 'POST',
       body: JSON.stringify(enrichedData),
       headers: { 'Content-Type': 'application/json' },
     });
 
     if (res.ok) {
-      toast.success('Imported successfully');
+      toast.success('Rooms imported successfully');
       setCsvData([]);
     } else {
-      toast.error('Failed to import');
+      toast.error('Import failed');
     }
   };
 
   return (
     <div className="bg-white border p-6 rounded-lg shadow space-y-4 mt-4">
       <div className="space-y-2">
-        <Label>Select Shivir</Label>
-        <Select onValueChange={setSelectedShivirId}>
+        <Label>Select Room Type</Label>
+        <Select onValueChange={setSelectedRoomTypeId}>
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Choose Shivir" />
+            <SelectValue placeholder="Choose Room Type" />
           </SelectTrigger>
           <SelectContent>
-            {shivirs.map((s) => (
-              <SelectItem key={s.id} value={s.id}>
-                {s.occasion}
+            {roomTypes.map((type) => (
+              <SelectItem key={type.id} value={type.id}>
+                {type.description}
               </SelectItem>
             ))}
           </SelectContent>
@@ -78,7 +78,7 @@ export default function SatsangiesImport({ shivirs }: { shivirs: { id: string; o
       </div>
 
       <div>
-        <Label className="text-sm font-medium mb-1 block">Upload CSV File</Label>
+        <Label>Upload CSV File</Label>
         <Input type="file" accept=".csv" onChange={handleFileChange} className="w-full" />
       </div>
 

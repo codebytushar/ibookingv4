@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { createRoom, deleteRoom } from '@/app/dashboard/admin/rooms/actions';
-
+import RoomsImport from './RoomsImport';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -22,6 +22,7 @@ export default function RoomsPage({
   roomTypes: { id: string; description: string }[];
 }) {
   const [showForm, setShowForm] = useState(false);
+const [showImport, setShowImport] = useState(false);
 
   const getRoomDescription = (roomTypeId: string): string => {
     const roomType = roomTypes.find((type) => type.id === roomTypeId);
@@ -70,10 +71,14 @@ export default function RoomsPage({
         </div>
       </div>
       {/* Page Header & Toggle Button */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap gap-4">
         <Button onClick={() => setShowForm(!showForm)}>
           {showForm ? 'Hide Form' : 'Add Room'}
         </Button>
+        <Button variant="secondary" onClick={() => setShowImport(!showImport)}>
+  {showImport ? 'Hide Import' : 'Import Rooms'}
+</Button>
+
       </div>
 
       {/* Add Room Form */}
@@ -114,7 +119,12 @@ export default function RoomsPage({
         </form>
       )}
 
-      {/* Room List Table */}
+      {showImport && (
+  <div className="mt-4">
+    <RoomsImport roomTypes={roomTypes} />
+  </div>
+)}
+
   
     </div>
   );

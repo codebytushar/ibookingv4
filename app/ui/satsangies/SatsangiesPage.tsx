@@ -233,11 +233,11 @@ export default function SatsangiesPage({
       )}
 
 
-      {showImport && (
-        <div className="mt-4">
-          <SatsangiesImport />
-        </div>
-      )}
+    {showImport && (
+  <div className="mt-4">
+    <SatsangiesImport shivirs={shivirs} />
+  </div>
+)}
 
     </div>
   );
