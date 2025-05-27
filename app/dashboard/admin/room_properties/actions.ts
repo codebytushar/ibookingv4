@@ -5,6 +5,11 @@ import { sql } from '@vercel/postgres';
 import { UUID } from 'crypto';
 import { redirect } from 'next/navigation';
 
+export async function getAllRoomProperties() {
+  const { rows } = await sql`SELECT * FROM room_properties`;
+  return rows;
+}
+
 export async function createRoomProperty(formData: FormData) {
   const shivir_id = formData.get('shivir_id') as string;
   const name = formData.get('name') as string;
@@ -19,7 +24,7 @@ export async function createRoomProperty(formData: FormData) {
     VALUES (${shivir_id}, ${name}, ${address}, ${map_link}, ${city}, ${state}, ${pin})
   `;
 
-  redirect('/dashboardd/admin/room-properties'); // Reload the page
+  redirect('/dashboard/admin/room_properties'); // Reload the page
 }
 
 export async function deleteRoomProperty(id: number) {

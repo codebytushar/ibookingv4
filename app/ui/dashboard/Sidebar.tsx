@@ -10,11 +10,11 @@ export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
+    { name: 'Satsangies', href: '/dashboard/admin/satsangies' },
     { name: 'Shivirs', href: '/dashboard/admin/shivirs' },
-    // { name: 'Satsangis', href: '/satsangis/new' },
     { name: 'Room Properties', href: '/dashboard/admin/room_properties' },
-    // { name: 'Room Types', href: '/room_types/new' },
-    // { name: 'Rooms', href: '/rooms/new' },
+    { name: 'Room Types', href: '/dashboard/admin/room_types' },
+    { name: 'Rooms', href: '/dashboard/admin/rooms' },
     // { name: 'Allocations', href: '/allocations/new' },
     // { name: 'Checked In', href: '/checked_in/new' },
     // { name: 'Checked Out', href: '/checked_out/new' },
