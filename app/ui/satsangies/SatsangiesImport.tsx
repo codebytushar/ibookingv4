@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import Papa from 'papaparse';
 import toast from 'react-hot-toast';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function SatsangiesImport() {
   const [csvData, setCsvData] = useState<any[]>([]);
@@ -43,8 +45,12 @@ export default function SatsangiesImport() {
   };
 
   return (
-    <div className="bg-white p-6 rounded shadow space-y-4 mt-4">
-      <input type="file" accept=".csv" onChange={handleFileChange} />
+    <div className="bg-white border p-6 rounded-lg shadow space-y-4 mt-4">
+      <div>
+        <label className="text-sm font-medium mb-1 block">Upload CSV File</label>
+        <Input type="file" accept=".csv" onChange={handleFileChange} className="w-full" />
+      </div>
+
       {csvData.length > 0 && (
         <>
           <div className="overflow-auto max-h-64 border rounded">
@@ -67,9 +73,10 @@ export default function SatsangiesImport() {
               </tbody>
             </table>
           </div>
-          <button onClick={handleImport} className="bg-green-600 text-white px-4 py-2 rounded">
+
+          <Button onClick={handleImport} className="bg-green-600 text-white">
             Import
-          </button>
+          </Button>
         </>
       )}
     </div>

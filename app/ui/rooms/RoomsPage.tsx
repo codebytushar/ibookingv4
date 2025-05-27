@@ -16,8 +16,12 @@ export default function RoomsPage({ rooms, roomTypes }: {
   roomTypes: { id: string; description: string }[]
 }) {
   const [showForm, setShowForm] = useState(false);
-
-  return (
+  // Function to get room description from room type ID
+const getRoomDescription = (roomTypeId: string): string => {
+  const roomType = roomTypes.find(type => type.id === roomTypeId);
+  return roomType?.description || 'Unknown';
+};   
+ return (
     <div className="max-w-4xl mx-auto py-10 space-y-6">
       <Toaster />
       <button
@@ -57,7 +61,7 @@ export default function RoomsPage({ rooms, roomTypes }: {
               <TableHead className="text-white">Room No</TableHead>
               <TableHead className="text-white">Floor</TableHead>
               <TableHead className="text-white">Status</TableHead>
-              <TableHead className="text-white">Room Type ID</TableHead>
+              <TableHead className="text-white">Room Type</TableHead>
               <TableHead className="text-white">Action</TableHead>
             </TableRow>
           </TableHeader>
@@ -67,8 +71,8 @@ export default function RoomsPage({ rooms, roomTypes }: {
                 <TableCell>{room.room_no}</TableCell>
                 <TableCell>{room.floor}</TableCell>
                 <TableCell>{room.status}</TableCell>
-                <TableCell>{room.room_type_id}</TableCell>
-                <TableCell>
+                <TableCell>{getRoomDescription(room.room_type_id)}</TableCell>
+                                <TableCell>
                   <form
                     action={async () => {
                       await deleteRoom(room.id);
