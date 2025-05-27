@@ -1,31 +1,96 @@
 'use client';
 
 import { useState } from 'react';
-import { createRoomProperty, deleteRoomProperty } from '@/app/dashboard/admin/room_properties/actions'; // Adjust the import path as necessary
+import { createRoomProperty, deleteRoomProperty } from '@/app/dashboard/admin/room_properties/actions';
 import toast, { Toaster } from 'react-hot-toast';
 import { QueryResultRow } from '@vercel/postgres';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
-export default function RoomPropertiesPage({ properties, shivirs }: { properties: QueryResultRow[], shivirs: { id: number; occasion: string }[]; }) {
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from '@/components/ui/table';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
+
+export default function RoomPropertiesPage({
+  properties,
+  shivirs,
+}: {
+  properties: QueryResultRow[];
+  shivirs: { id: string; occasion: string }[];
+}) {
   const [showForm, setShowForm] = useState(false);
 
-  return (
-    <div className="max-w-4xl mx-auto py-10 space-y-8">
-      <Toaster />
+  // Function to get shivir occasion from id
+const getShivirOccasion = (shivirId: string): string => {
+  const shivir = shivirs.find(s => s.id === shivirId);
+  return shivir ? shivir.occasion : 'Unknown';
+}  
 
-      <button
-        className="bg-indigo-600 text-white px-4 py-2 rounded"
-        onClick={() => setShowForm(!showForm)}
-      >
-        {showForm ? 'Hide Form' : 'Add Room Property'}
-      </button>
+  return (
+    <div className="space-y-10">
+      <Toaster />
+  <div className="bg-white border rounded-lg shadow p-6">
+        <h3 className="text-xl font-semibold mb-4">Room Properties List</h3>
+        <div className="overflow-auto max-h-[400px]">
+          <Table>
+            <TableHeader className="bg-gray-800">
+              <TableRow>
+                <TableHead className="text-white">Name</TableHead>
+                <TableHead className="text-white">City / State</TableHead>
+                <TableHead className="text-white">PIN</TableHead>
+                <TableHead className="text-white">Shivir</TableHead>
+                <TableHead className="text-white">Map Link</TableHead>
+                <TableHead className="text-white">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {properties.map((p) => (
+                <TableRow key={p.id}>
+                  <TableCell className="font-medium">{p.name}</TableCell>
+                  <TableCell>{p.city}, {p.state}</TableCell>
+                  <TableCell>{p.pin}</TableCell>
+                  <TableCell>{getShivirOccasion(p.shivir_id)}</TableCell>
+                  <TableCell>
+                    {p.map_link ? (
+                      <a
+                        href={p.map_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline text-sm"
+                      >
+                        View Map
+                      </a>
+                    ) : (
+                      "-"
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <form
+                      action={async () => {
+                        await deleteRoomProperty(p.id);
+                        toast.success("Deleted successfully");
+                      }}
+                    >
+                      <Button variant="destructive" size="sm" type="submit">
+                        Delete
+                      </Button>
+                    </form>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+      <div className="flex justify-between items-center">
+        <Button onClick={() => setShowForm(!showForm)}>
+          {showForm ? 'Hide Form' : 'Add Room Property'}
+        </Button>
+      </div>
 
       {showForm && (
         <form
@@ -34,78 +99,40 @@ export default function RoomPropertiesPage({ properties, shivirs }: { properties
             setShowForm(false);
             toast.success('Property added!');
           }}
-          className="bg-white p-6 rounded shadow space-y-4"
+          className="bg-white border p-6 rounded-lg shadow space-y-6"
         >
-          <h2 className="text-lg font-bold">New Room Property</h2>
-          <select name="shivir_id" required className="w-full border p-2 rounded">
-            <option value="">Select Shivir</option>
-            {shivirs.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.occasion}
-              </option>
-            ))}
-          </select>
-          <input name="name" placeholder="Name" required className="w-full border p-2 rounded" />
-          <input name="address" placeholder="Address" required className="w-full border p-2 rounded" />
-          <input name="map_link" placeholder="Map Link" className="w-full border p-2 rounded" />
-          <input name="city" placeholder="City" required className="w-full border p-2 rounded" />
-          <input name="state" placeholder="State" required className="w-full border p-2 rounded" />
-          <input name="pin" placeholder="PIN Code" required className="w-full border p-2 rounded" />
-          <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded">Save</button>
+          <h3 className="text-lg font-semibold">New Room Property</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="shivir_id" className="mb-1 block">Shivir</Label>
+              <Select name="shivir_id">
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Shivir" />
+                </SelectTrigger>
+                <SelectContent>
+                  {shivirs.map((s) => (
+                    <SelectItem key={s.id} value={s.id.toString()}>
+                      {s.occasion}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Input name="name" placeholder="Name" required />
+            <Input name="address" placeholder="Address" required />
+            <Input name="map_link" placeholder="Map Link" />
+            <Input name="city" placeholder="City" required />
+            <Input name="state" placeholder="State" required />
+            <Input name="pin" placeholder="PIN Code" required />
+          </div>
+
+          <Button type="submit">Save</Button>
         </form>
       )}
 
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Room Properties</h2>
-        <Table>
-          <TableHeader className="bg-gray-800">
-            <TableRow>
-              <TableHead className="text-white">Name</TableHead>
-              <TableHead className="text-white">City / State</TableHead>
-              <TableHead className="text-white">PIN</TableHead>
-              <TableHead className="text-white">Shivir ID</TableHead>
-              <TableHead className="text-white">Map Link</TableHead>
-              <TableHead className="text-white">Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {properties.map((p) => (
-              <TableRow key={p.id}>
-                <TableCell className="font-medium">{p.name}</TableCell>
-                <TableCell>{p.city}, {p.state}</TableCell>
-                <TableCell>{p.pin}</TableCell>
-                <TableCell>{p.shivir_id}</TableCell>
-                <TableCell>
-                  {p.map_link ? (
-                    <a
-                      href={p.map_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 underline text-sm"
-                    >
-                      View Map
-                    </a>
-                  ) : (
-                    "-"
-                  )}
-                </TableCell>
-                <TableCell>
-                  <form
-                    action={async () => {
-                      await deleteRoomProperty(p.id);
-                      toast.success("Deleted successfully");
-                    }}
-                  >
-                    <button type="submit" className="text-red-600 hover:underline text-sm">
-                      Delete
-                    </button>
-                  </form>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+    
     </div>
   );
 }
