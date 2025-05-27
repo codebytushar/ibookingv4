@@ -3,7 +3,14 @@
 import { useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { createRoom, deleteRoom } from '@/app/dashboard/admin/rooms/actions';
-
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 export default function RoomsPage({ rooms, roomTypes }: {
   rooms: any[],
   roomTypes: { id: string; description: string }[]
@@ -44,22 +51,39 @@ export default function RoomsPage({ rooms, roomTypes }: {
 
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Rooms List</h2>
-        {rooms.map((room) => (
-          <div key={room.id} className="bg-white p-4 rounded shadow space-y-1">
-            <p><strong>Room No:</strong> {room.room_no}</p>
-            <p><strong>Floor:</strong> {room.floor}</p>
-            <p><strong>Status:</strong> {room.status}</p>
-            <p><strong>Room Type ID:</strong> {room.room_type_id}</p>
-            <form
-              action={async () => {
-                await deleteRoom(room.id);
-                toast.success('Deleted successfully');
-              }}
-            >
-              <button type="submit" className="text-red-600 text-sm mt-2">Delete</button>
-            </form>
-          </div>
-        ))}
+        <Table>
+          <TableHeader className="bg-gray-800">
+            <TableRow>
+              <TableHead className="text-white">Room No</TableHead>
+              <TableHead className="text-white">Floor</TableHead>
+              <TableHead className="text-white">Status</TableHead>
+              <TableHead className="text-white">Room Type ID</TableHead>
+              <TableHead className="text-white">Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rooms.map((room) => (
+              <TableRow key={room.id}>
+                <TableCell>{room.room_no}</TableCell>
+                <TableCell>{room.floor}</TableCell>
+                <TableCell>{room.status}</TableCell>
+                <TableCell>{room.room_type_id}</TableCell>
+                <TableCell>
+                  <form
+                    action={async () => {
+                      await deleteRoom(room.id);
+                      toast.success("Deleted successfully");
+                    }}
+                  >
+                    <button type="submit" className="text-red-600 hover:underline text-sm">
+                      Delete
+                    </button>
+                  </form>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

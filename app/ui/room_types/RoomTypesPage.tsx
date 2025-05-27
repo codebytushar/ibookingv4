@@ -3,6 +3,14 @@
 import { useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { createRoomType, deleteRoomType } from '@/app/dashboard/admin/room_types/actions';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function RoomTypesPage({ roomTypes, properties }: {
   roomTypes: any[],
@@ -10,6 +18,12 @@ export default function RoomTypesPage({ roomTypes, properties }: {
 }) {
   const [showForm, setShowForm] = useState(false);
 
+  
+  // Function to get property name from property ID
+const getPropertyName = (propertyId: string): string => {
+  const property = properties.find(p => p.id === propertyId);
+  return property ? property.name : propertyId;
+}  
   return (
     <div className="max-w-4xl mx-auto py-10 space-y-6">
       <Toaster />
@@ -44,22 +58,41 @@ export default function RoomTypesPage({ roomTypes, properties }: {
       )}
 
       <h2 className="text-xl font-semibold">Room Types</h2>
-      {roomTypes.map((r) => (
-        <div key={r.id} className="bg-white shadow p-4 rounded space-y-1">
-          <p><strong>Description:</strong> {r.description}</p>
-          <p><strong>Base:</strong> {r.base_capacity}, <strong>Extra:</strong> {r.extra_capacity}</p>
-          <p><strong>Total Rooms:</strong> {r.total_rooms}</p>
-          <p><strong>Property:</strong> {r.property_id}</p>
-          <form
-            action={async () => {
-              await deleteRoomType(r.id);
-              toast.success('Deleted successfully');
-            }}
-          >
-            <button type="submit" className="text-red-600 text-sm mt-2">Delete</button>
-          </form>
-        </div>
-      ))}
+      <Table>
+        <TableHeader className="bg-gray-800">
+          <TableRow>
+            <TableHead className="text-white">Description</TableHead>
+            <TableHead className="text-white">Base Capacity</TableHead>
+            <TableHead className="text-white">Extra Capacity</TableHead>
+            <TableHead className="text-white">Total Rooms</TableHead>
+            <TableHead className="text-white">Property</TableHead>
+            <TableHead className="text-white">Action</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {roomTypes.map((r) => (
+            <TableRow key={r.id}>
+              <TableCell>{r.description}</TableCell>
+              <TableCell>{r.base_capacity}</TableCell>
+              <TableCell>{r.extra_capacity}</TableCell>
+              <TableCell>{r.total_rooms}</TableCell>
+              <TableCell>{getPropertyName(r.property_id)}</TableCell>
+              <TableCell>
+                <form
+                  action={async () => {
+                    await deleteRoomType(r.id);
+                    toast.success("Deleted successfully");
+                  }}
+                >
+                  <button type="submit" className="text-red-600 hover:underline text-sm">
+                    Delete
+                  </button>
+                </form>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }

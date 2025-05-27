@@ -1,11 +1,16 @@
 'use server';
 
 import { sql } from '@vercel/postgres';
-import { revalidatePath } from 'next/cache';
 import { v4 as uuidv4 } from 'uuid';
+import { revalidatePath } from 'next/cache';
 
 export async function getAllSatsangies() {
   const { rows } = await sql`SELECT * FROM satsangies`;
+  return rows;
+}
+
+export async function getAllShivirIds() {
+  const { rows } = await sql`SELECT id, occasion FROM shivirs`;
   return rows;
 }
 
@@ -21,14 +26,17 @@ export async function createSatsangi(formData: FormData) {
   const mobile = formData.get('mobile') as string;
   const email = formData.get('email') as string;
   const gender = formData.get('gender') as string;
+  const shivir_id = formData.get('shivir_id') as string;
+  const payment_id = Number(formData.get('payment_id'));
 
   await sql`
     INSERT INTO satsangies (
       id, name, age, city, state, birthdate, panno,
-      address, mobile, email, gender
+      address, mobile, email, gender, shivir_id, payment_id
     ) VALUES (
       ${id}, ${name}, ${age || null}, ${city}, ${state || null}, ${birthdate || null}, ${panno || null},
-      ${address || null}, ${mobile || null}, ${email || null}, ${gender || null}
+      ${address || null}, ${mobile || null}, ${email || null}, ${gender || null},
+      ${shivir_id || null}, ${payment_id || null}
     )
   `;
 
