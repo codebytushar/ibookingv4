@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { RoomAllocation } from '@/app/datatypes/custom';
 import {
@@ -9,9 +9,145 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Satsangi } from '@/app/datatypes/schema';
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast"; // Add toast hook
+import { Loader2 } from "lucide-react"; // Add loading icon
 
 export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) {
-  const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
+  const [selectedRoom, setSelectedRoom] = useState<RoomAllocation | null>(null);
+  const [satsangies, setSatsangies] = useState<Satsangi[]>([]);
+  const [filteredSatsangies, setFilteredSatsangies] = useState<Satsangi[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedSatsangies, setSelectedSatsangies] = useState<Satsangi[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false); // New loading state for assignment
+  const { toast } = useToast(); // Initialize toast hook
+
+  useEffect(() => {
+    if (selectedRoom) {
+      fetchUnassignedSatsangies();
+    }
+  }, [selectedRoom]);
+
+  const fetchUnassignedSatsangies = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/satsangies/allocations/unassigned');
+      if (!response.ok) {
+        throw new Error('Failed to fetch unassigned satsangies');
+      }
+      const data = await response.json();
+      setSatsangies(data);
+      setFilteredSatsangies(data.filter((s: { id: string; }) => !selectedSatsangies.some(selected => selected.id === s.id)));
+    } catch (error) {
+      console.error('Error fetching satsangies:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load unassigned satsangies. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const filtered = satsangies.filter(satsangi =>
+      !selectedSatsangies.some(selected => selected.id === satsangi.id) &&
+      (satsangi.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       satsangi.city.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+    setFilteredSatsangies(filtered);
+  }, [searchTerm, satsangies, selectedSatsangies]);
+
+  const handleRoomSelect = (room: RoomAllocation) => {
+    setSelectedRoom(room);
+    setSelectedSatsangies([]);
+    setSearchTerm('');
+  };
+
+  const handleCloseDialog = () => {
+    setSelectedRoom(null);
+  };
+
+  const handleSatsangiSelect = (satsangi: Satsangi) => {
+    if (!selectedRoom) return;
+    
+    const maxCapacity = selectedRoom.base_capacity + selectedRoom.extra_capacity;
+    const currentAllocation = selectedRoom.total_allocated + selectedSatsangies.length;
+    
+    if (currentAllocation < maxCapacity) {
+      setSelectedSatsangies([...selectedSatsangies, satsangi]);
+      setSearchTerm('');
+      setFilteredSatsangies(filteredSatsangies.filter(s => s.id !== satsangi.id));
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Room Full",
+        description: "Cannot add more satsangies. Room capacity reached.",
+      });
+    }
+  };
+
+  const removeSatsangi = (id: string) => {
+    const removed = selectedSatsangies.find(s => s.id === id);
+    setSelectedSatsangies(selectedSatsangies.filter(s => s.id !== id));
+    if (removed && satsangies.some(s => s.id === id)) {
+      setFilteredSatsangies([...filteredSatsangies, removed]);
+    }
+  };
+
+  const handleAssign = async () => {
+    if (!selectedRoom || selectedSatsangies.length === 0) return;
+    
+    setIsAssigning(true);
+    try {
+      const response = await fetch('/api/satsangies/allocations/assignbulk', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          roomId: selectedRoom.id,
+          satsangiIds: selectedSatsangies.map(s => s.id)
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to assign satsangies');
+      }
+
+      toast({
+        title: "Success",
+        description: `Successfully assigned ${selectedSatsangies.length} satsangi${selectedSatsangies.length !== 1 ? 's' : ''} to Room #${selectedRoom.room_no}`,
+      });
+      window.location.reload();
+    } catch (error) {
+      console.error('Error assigning satsangies:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to assign satsangies. Please try again.",
+      });
+    } finally {
+      setIsAssigning(false);
+    }
+  };
+
+  const getAvailableSlots = () => {
+    if (!selectedRoom) return 0;
+    const maxCapacity = selectedRoom.base_capacity + selectedRoom.extra_capacity;
+    return maxCapacity - selectedRoom.total_allocated - selectedSatsangies.length;
+  };
 
   return (
     <div className="space-y-2 p-6 bg-gray-100 rounded-lg shadow">
@@ -19,21 +155,22 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
         {rooms.map((room) => {
           const maxCapacity = room.base_capacity + room.extra_capacity;
           const isFull = room.total_allocated >= maxCapacity;
-          const Available = maxCapacity - room.total_allocated;
+          const available = maxCapacity - room.total_allocated;
 
           return (
             <div
               key={room.id}
-              className={`border rounded-xl p-4 shadow flex flex-col justify-between space-y-4 ${Available === 0
-                ? 'bg-red-200'
-                : Available === 1
-                  ? 'bg-red-100'
-                  : Available === 2
-                    ? 'bg-yellow-200'
-                    : Available === 3
-                      ? 'bg-yellow-100'
-                      : 'bg-green-200'
-                }`}
+              className={`border rounded-xl p-4 shadow flex flex-col justify-between space-y-4 ${
+                available === 0
+                  ? 'bg-red-200'
+                  : available === 1
+                    ? 'bg-red-100'
+                    : available === 2
+                      ? 'bg-yellow-200'
+                      : available === 3
+                        ? 'bg-yellow-100'
+                        : 'bg-green-200'
+              }`}
             >
               <div>
                 <TooltipProvider>
@@ -51,7 +188,6 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
               </div>
 
               <div>
-
                 <p className={`text-sm font-medium ${isFull ? 'text-red-600' : 'text-green-600'}`}>
                   {isFull ? 'Full' : 'Available'}
                 </p>
@@ -61,7 +197,7 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
                 <Button
                   variant="outline"
                   disabled={isFull}
-                  onClick={() => setSelectedRoom(room.id)}
+                  onClick={() => handleRoomSelect(room)}
                 >
                   {isFull ? 'Room Full' : 'Assign Satsangi'}
                 </Button>
@@ -71,13 +207,102 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
         })}
       </div>
 
-      {selectedRoom && (
-        <div className="mt-8 p-4 bg-gray-50 rounded border">
-          {/* Your allocation form component or logic here */}
-          <p className="font-medium">Assigning satsangi to Room ID: {selectedRoom}</p>
-          {/* Include a satsangi dropdown + assign button here */}
-        </div>
-      )}
+      <Dialog open={!!selectedRoom} onOpenChange={handleCloseDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>
+              Assign Satsangies to Room #{selectedRoom?.room_no}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div>
+              <p className="text-sm text-gray-600 mb-2">
+                Capacity: {selectedRoom?.total_allocated}/{selectedRoom ? selectedRoom.base_capacity + selectedRoom.extra_capacity : 0}
+                {selectedSatsangies.length > 0 && ` (Adding ${selectedSatsangies.length})`}
+              </p>
+              
+              {selectedSatsangies.length > 0 && (
+                <div className="mb-4 flex flex-wrap gap-2">
+                  {selectedSatsangies.map((satsangi) => (
+                    <Badge 
+                      key={satsangi.id} 
+                      variant="outline"
+                      className="flex items-center gap-1 py-1"
+                    >
+                      {satsangi.name}
+                      <button 
+                        onClick={() => removeSatsangi(satsangi.id)}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <X size={14} />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+
+              <div className="relative">
+                <Input
+                  placeholder={
+                    getAvailableSlots() > 0 
+                      ? "Search satsangi by name or city..."
+                      : "Room capacity reached"
+                  }
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full"
+                  disabled={getAvailableSlots() <= 0 || isAssigning}
+                />
+                {isLoading && (
+                  <p className="text-sm text-gray-500 mt-2 flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading satsangies...
+                  </p>
+                )}
+                {!isLoading && searchTerm && getAvailableSlots() > 0 && (
+                  <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                    {filteredSatsangies.length === 0 ? (
+                      <div className="p-2 text-sm text-gray-500">No matching satsangies found</div>
+                    ) : (
+                      filteredSatsangies.map((satsangi) => (
+                        <div
+                          key={satsangi.id}
+                          className="p-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => handleSatsangiSelect(satsangi)}
+                        >
+                          <div className="font-medium">{satsangi.name}</div>
+                          <div className="text-sm text-gray-600">
+                            {satsangi.city} • Age: {satsangi.age || 'N/A'}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center mt-4">
+              <p className="text-sm text-gray-600">
+                {getAvailableSlots()} slot(s) remaining
+              </p>
+              <Button
+                onClick={handleAssign}
+                disabled={selectedSatsangies.length === 0 || isAssigning}
+              >
+                {isAssigning ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Assigning...
+                  </>
+                ) : (
+                  `Assign ${selectedSatsangies.length} Satsangi${selectedSatsangies.length !== 1 ? 's' : ''}`
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
