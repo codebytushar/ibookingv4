@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 
-
 export default function SatsangiesPage({
   satsangies,
   shivirs,
@@ -37,17 +36,22 @@ export default function SatsangiesPage({
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-
-  const filtered = satsangies.filter((s) =>
-    s.name.toLowerCase().includes(search.toLowerCase()) ||
-    s.city.toLowerCase().includes(search.toLowerCase())
+const filtered = satsangies.filter((s) => {
+  const searchTerm = search.toLowerCase();
+  return (
+    (s.name && s.name.toLowerCase().includes(searchTerm)) ||
+    (s.city && s.city.toLowerCase().includes(searchTerm)) ||
+    (s.gender && s.gender.toLowerCase().includes(searchTerm)) ||
+    (s.room_no !== null && s.room_no !== undefined && s.room_no.toString().toLowerCase().includes(searchTerm)) ||
+    (s.age !== null && s.age !== undefined && s.age.toString().includes(searchTerm))
   );
+});
+
+
 
   const totalPages = Math.ceil(filtered.length / rowsPerPage);
   const startIdx = (currentPage - 1) * rowsPerPage;
   const paginated = filtered.slice(startIdx, startIdx + rowsPerPage);
-
-
 
   function getShivirOccasion(shivirId: string): string {
     return shivirs.find(shivir => shivir.id === shivirId)?.occasion || '';
@@ -64,44 +68,27 @@ export default function SatsangiesPage({
           <Table>
             <TableHeader className="bg-gray-800">
               <TableRow>
-                <TableHead className="text-white">Sr. No.</TableHead>
                 <TableHead className="text-white">Name</TableHead>
+                <TableHead className="text-white">Age</TableHead>
                 <TableHead className="text-white">City</TableHead>
                 <TableHead className="text-white">Gender</TableHead>
-                <TableHead className="text-white">Shivir</TableHead>
-                <TableHead className="text-white">Payment ID</TableHead>
-                <TableHead className="text-white">Action</TableHead>
+                <TableHead className="text-white">Room No.</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginated.map((s, index) => (
-                <TableRow key={s.id}>
-                  <TableCell>{startIdx + index + 1}</TableCell>
+              {paginated.map((s) => (
+                <TableRow key={s.satsangi_id}>
                   <TableCell>{s.name}</TableCell>
+                  <TableCell>{s.age}</TableCell>
                   <TableCell>{s.city}</TableCell>
                   <TableCell>{s.gender}</TableCell>
-                  <TableCell>{getShivirOccasion(s.shivir_id)}</TableCell>
-                  <TableCell>{s.payment_id}</TableCell>
-                  <TableCell>
-                    <form
-                      action={async () => {
-                        await deleteSatsangi(s.id);
-                        toast.success("Deleted successfully");
-                      }}
-                    >
-                      <button
-                        type="submit"
-                        className="text-red-600 hover:underline text-sm"
-                      >
-                        Delete
-                      </button>
-                    </form>
-                  </TableCell>
+                  <TableCell>{s.room_no}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
+
 
         {/* Search + Pagination Controls */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 pt-2">
@@ -159,7 +146,6 @@ export default function SatsangiesPage({
           </div>
         </div>
       </div>
-
 
       <div className="flex flex-wrap gap-4">
         <Button variant="default" onClick={() => setShowForm(!showForm)}>
@@ -232,13 +218,11 @@ export default function SatsangiesPage({
         </form>
       )}
 
-
-    {showImport && (
-  <div className="mt-4">
-    <SatsangiesImport shivirs={shivirs} />
-  </div>
-)}
-
+      {showImport && (
+        <div className="mt-4">
+          <SatsangiesImport shivirs={shivirs} />
+        </div>
+      )}
     </div>
   );
 }

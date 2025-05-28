@@ -1,3 +1,5 @@
+import { Satsangi } from "./schema";
+
 export type RoomAllocation = {
   id: string;
   room_type_id: string;
@@ -9,3 +11,8 @@ export type RoomAllocation = {
   total_allocated: number;
   description: string; // Room type description
 };
+
+// Make sure to import or define Satsangi above this interface
+export interface SatsangiWithRoom extends Satsangi {
+  room_no: string | null; // Room number if allocated
+}

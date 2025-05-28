@@ -3,9 +3,15 @@
 import { sql } from '@vercel/postgres';
 import { v4 as uuidv4 } from 'uuid';
 import { revalidatePath } from 'next/cache';
+import { RoomAllocation, SatsangiWithRoom } from '@/app/datatypes/custom';
 
 export async function getAllSatsangies() {
   const { rows } = await sql`SELECT * FROM satsangies`;
+  return rows;
+}
+
+export async function getAllSatsangieswithRoomNo() {
+  const { rows } = await sql`SELECT * FROM satsangi_room_allocation`;
   return rows;
 }
 
@@ -46,4 +52,24 @@ export async function createSatsangi(formData: FormData) {
 export async function deleteSatsangi(id: string) {
   await sql`DELETE FROM satsangies WHERE id = ${id}`;
   revalidatePath('/dashboard/admin/satsangies');
+}
+
+export async function getRoomsWithAllocations() {
+  const  rooms  = await sql<RoomAllocation[]>`
+    SELECT
+    r.id,
+      r.room_no,
+      r.floor,
+      r.status,
+      rt.description,
+      rt.base_capacity,
+      rt.extra_capacity,
+      COUNT(a.id)::int AS total_allocated
+    FROM rooms r
+    JOIN room_types rt ON r.room_type_id = rt.id
+    LEFT JOIN allocations a ON a.room_id = r.id
+    GROUP BY r.id, rt.description, rt.base_capacity, rt.extra_capacity
+    order by r.floor, r.room_no
+  `;
+  return rooms.rows;
 }

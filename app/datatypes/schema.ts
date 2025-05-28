@@ -52,4 +52,10 @@ export type Room = {
   status: string;
 };
 
+export type Allocation = {
+  id: string;
+  room_id: string;
+  satsangi_id: string;
+};
+
 
