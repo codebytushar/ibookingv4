@@ -9,8 +9,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { UserPlus, Users, Ban, CheckCircle, XCircle } from "lucide-react";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -21,6 +23,8 @@ import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast"; // Add toast hook
 import { Loader2 } from "lucide-react"; // Add loading icon
+import { getAllocatedSatsangies } from '@/app/dashboard/admin/satsangies/actions';
+import AllocatedSatsangiesDialog from './AllocatedSatsangiesDialog';
 
 export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) {
   const [selectedRoom, setSelectedRoom] = useState<RoomAllocation | null>(null);
@@ -31,6 +35,21 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
   const [isLoading, setIsLoading] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false); // New loading state for assignment
   const { toast } = useToast(); // Initialize toast hook
+  const [showAssignDialog, setShowAssignDialog] = useState(false);      // Dialog A
+  const [showAllocatedDialog, setShowAllocatedDialog] = useState(false); // Dialog B
+  const [allocatedSatsangies, setAllocatedSatsangies] = useState<{ id: string; name: string }[]>([]);
+
+  const handleViewAllocated = async (room: RoomAllocation) => {
+    setSelectedRoom(room);
+    const ss = await getAllocatedSatsangies(room.id);
+    setAllocatedSatsangies(
+      ss.map((row: any) => ({
+        id: row.id,
+        name: row.name,
+      }))
+    );
+    setShowAllocatedDialog(true);
+  };
 
   useEffect(() => {
     if (selectedRoom) {
@@ -64,7 +83,7 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
     const filtered = satsangies.filter(satsangi =>
       !selectedSatsangies.some(selected => selected.id === satsangi.id) &&
       (satsangi.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       satsangi.city.toLowerCase().includes(searchTerm.toLowerCase()))
+        satsangi.city.toLowerCase().includes(searchTerm.toLowerCase()))
     );
     setFilteredSatsangies(filtered);
   }, [searchTerm, satsangies, selectedSatsangies]);
@@ -76,15 +95,15 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
   };
 
   const handleCloseDialog = () => {
-    setSelectedRoom(null);
+    setShowAssignDialog(false);
   };
 
   const handleSatsangiSelect = (satsangi: Satsangi) => {
     if (!selectedRoom) return;
-    
+
     const maxCapacity = selectedRoom.base_capacity + selectedRoom.extra_capacity;
     const currentAllocation = selectedRoom.total_allocated + selectedSatsangies.length;
-    
+
     if (currentAllocation < maxCapacity) {
       setSelectedSatsangies([...selectedSatsangies, satsangi]);
       setSearchTerm('');
@@ -108,7 +127,7 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
 
   const handleAssign = async () => {
     if (!selectedRoom || selectedSatsangies.length === 0) return;
-    
+
     setIsAssigning(true);
     try {
       const response = await fetch('/api/satsangies/allocations/assignbulk', {
@@ -160,17 +179,16 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
           return (
             <div
               key={room.id}
-              className={`border rounded-xl p-4 shadow flex flex-col justify-between space-y-4 ${
-                available === 0
-                  ? 'bg-red-200'
-                  : available === 1
-                    ? 'bg-red-100'
-                    : available === 2
-                      ? 'bg-yellow-200'
-                      : available === 3
-                        ? 'bg-yellow-100'
-                        : 'bg-green-200'
-              }`}
+              className={`border rounded-xl p-4 shadow flex flex-col justify-between space-y-4 ${available === 0
+                ? 'bg-red-200'
+                : available === 1
+                  ? 'bg-red-100'
+                  : available === 2
+                    ? 'bg-yellow-200'
+                    : available === 3
+                      ? 'bg-yellow-100'
+                      : 'bg-green-200'
+                }`}
             >
               <div>
                 <TooltipProvider>
@@ -187,32 +205,99 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
                 </TooltipProvider>
               </div>
 
-              <div>
+              {/* <div>
                 <p className={`text-sm font-medium ${isFull ? 'text-red-600' : 'text-green-600'}`}>
                   {isFull ? 'Full' : 'Available'}
                 </p>
-              </div>
-
+              </div> */}
               <div>
-                <Button
-                  variant="outline"
-                  disabled={isFull}
-                  onClick={() => handleRoomSelect(room)}
-                >
-                  {isFull ? 'Room Full' : 'Assign Satsangi'}
-                </Button>
+                <div className="flex gap-2 items-center justify-center">
+                  {/* <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        {isFull ? (
+                          <XCircle className="text-red-600 w-5 h-5" />
+                        ) : (
+                          <CheckCircle className="text-green-600 w-5 h-5" />
+                        )}
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{isFull ? "Room Full" : "Room Available"}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider> */}
+
+                  {/* View Allocated */}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={async () => {
+                            setSelectedRoom(room);
+                            const data = await getAllocatedSatsangies(room.id);
+                            setAllocatedSatsangies(data);
+                            setShowAllocatedDialog(true);
+                          }}
+                        >
+                          <Users className="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>View Allocated</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  {/* Assign / Full */}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          disabled={isFull}
+                          onClick={() => {
+                            setSelectedRoom(room);
+                            setShowAssignDialog(true);
+                          }}
+                        >
+                          {isFull ? <Ban className="w-4 h-4 text-red-600" /> : <UserPlus className="w-4 h-4" />}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{isFull ? "Room Full" : "Assign Satsangi"}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+
+                <AllocatedSatsangiesDialog
+                  open={showAllocatedDialog}
+                  onOpenChange={setShowAllocatedDialog}
+                  satsangies={allocatedSatsangies}
+                  roomId={selectedRoom?.id ?? ""}
+                  onSuccess={async () => {
+                    const updated = await getAllocatedSatsangies(selectedRoom!.id);
+                    setAllocatedSatsangies(updated);
+                  }}
+                />
+
+
               </div>
             </div>
           );
         })}
       </div>
 
-      <Dialog open={!!selectedRoom} onOpenChange={handleCloseDialog}>
+      <Dialog open={showAssignDialog} onOpenChange={handleCloseDialog}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>
               Assign Satsangies to Room #{selectedRoom?.room_no}
             </DialogTitle>
+
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div>
@@ -220,17 +305,17 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
                 Capacity: {selectedRoom?.total_allocated}/{selectedRoom ? selectedRoom.base_capacity + selectedRoom.extra_capacity : 0}
                 {selectedSatsangies.length > 0 && ` (Adding ${selectedSatsangies.length})`}
               </p>
-              
+
               {selectedSatsangies.length > 0 && (
                 <div className="mb-4 flex flex-wrap gap-2">
                   {selectedSatsangies.map((satsangi) => (
-                    <Badge 
-                      key={satsangi.id} 
+                    <Badge
+                      key={satsangi.id}
                       variant="outline"
                       className="flex items-center gap-1 py-1"
                     >
                       {satsangi.name}
-                      <button 
+                      <button
                         onClick={() => removeSatsangi(satsangi.id)}
                         className="text-muted-foreground hover:text-foreground"
                       >
@@ -244,7 +329,7 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
               <div className="relative">
                 <Input
                   placeholder={
-                    getAvailableSlots() > 0 
+                    getAvailableSlots() > 0
                       ? "Search satsangi by name or city..."
                       : "Room capacity reached"
                   }

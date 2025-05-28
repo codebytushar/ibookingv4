@@ -73,3 +73,32 @@ export async function getRoomsWithAllocations() {
   `;
   return rooms.rows;
 }
+
+
+export async function unassignSatsangi(roomId: string, satsangiId: string) {
+  try {
+    await sql`
+      DELETE FROM Allocations
+      WHERE room_id = ${roomId} AND satsangi_id = ${satsangiId};
+    `;
+
+    revalidatePath('/dashboard/admin/allocations'); // change if your route is different
+  } catch (error) {
+    console.error('Failed to unassign satsangi:', error);
+    throw error;
+  }
+}
+
+
+
+  export async function getAllocatedSatsangies(roomId: string): Promise<{ id: string; name: string }[]> {
+  const { rows } = await sql`
+    SELECT s.id, s.name
+    FROM Satsangies s
+    JOIN Allocations a ON s.id = a.satsangi_id
+    WHERE a.room_id = ${roomId};
+  `;
+
+  return rows as { id: string; name: string }[];
+}  
+  
