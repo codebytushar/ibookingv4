@@ -1,90 +1,65 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import toast from 'react-hot-toast';
+import { Button } from "@/components/ui/button";
 
-export default function RoomAllocationPage({ rooms, satsangies }: {
-  rooms: {
-    id: string;
-    description: string; 
-    base_capacity: number;
-    extra_capacity: number;
-    total_allocated: number;
-  }[];
-  satsangies: { id: string; name: string; city: string }[];
-}) {
-  const [selectedSatsangi, setSelectedSatsangi] = useState('');
-  const [selectedRoom, setSelectedRoom] = useState('');
+type Room = {
+  id: string;
+  description: string;
+  room_no: string;
+  floor: number;
+  base_capacity: number;
+  extra_capacity: number;
+  total_allocated: number;
+};
 
-  const handleAllocate = async () => {
-    if (!selectedSatsangi || !selectedRoom) {
-      toast.error('Please select both satsangi and room');
-      return;
-    }
-
-    const res = await fetch('/api/rooms/allocate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ satsangi_id: selectedSatsangi, room_id: selectedRoom }),
-    });
-
-    if (res.ok) {
-      toast.success('Allocation successful!');
-      setSelectedRoom('');
-      setSelectedSatsangi('');
-    } else {
-      toast.error('Allocation failed');
-    }
-  };
+export default function AllocationsPage({ rooms }: { rooms: Room[] }) {
+  const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
 
   return (
-    <div className="space-y-6 p-6 bg-white border rounded shadow">
-      <h2 className="text-xl font-semibold">Allocate Room to Satsangi</h2>
+    <div className="space-y-2 p-6 bg-gray-100 rounded-lg shadow">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {rooms.map((room) => {
+          const maxCapacity = room.base_capacity + room.extra_capacity;
+          const isFull = room.total_allocated >= maxCapacity;
 
-      {/* Form */}
-      <div className="grid md:grid-cols-2 gap-4">
-        <div>
-          <Label>Satsangi</Label>
-          <Select value={selectedSatsangi} onValueChange={setSelectedSatsangi}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Satsangi" />
-            </SelectTrigger>
-            <SelectContent>
-              {satsangies.map((s) => (
-                <SelectItem key={s.id} value={s.id}>
-                  {s.name} ({s.city})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+          return (
+            <div key={room.id} className="border rounded-xl p-4 shadow bg-white flex flex-col justify-between space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold">{room.description}</h3>
+                <p className="text-sm text-gray-600">Room #{room.room_no} — Floor {room.floor}</p>
+              </div>
 
-        <div>
-          <Label>Room</Label>
-          <Select value={selectedRoom} onValueChange={setSelectedRoom}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Room (Available Only)" />
-            </SelectTrigger>
-            <SelectContent>
-              {rooms
-                .filter((r) => r.total_allocated < r.base_capacity + r.extra_capacity)
-                .map((r) => (
-                  <SelectItem key={r.id} value={r.id}>
-                    {r.description} — {r.total_allocated}/
-                    {r.base_capacity + r.extra_capacity} occupied
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
-        </div>
+              <div>
+                <p className="text-sm">
+                  <strong>Capacity:</strong> {room.total_allocated}/{maxCapacity}
+                </p>
+                <p className={`text-sm font-medium ${isFull ? 'text-red-600' : 'text-green-600'}`}>
+                  {isFull ? 'Full' : 'Available'}
+                </p>
+              </div>
+
+              <div>
+                <Button
+                  variant="outline"
+                  disabled={isFull}
+                  onClick={() => setSelectedRoom(room.id)}
+                >
+                  {isFull ? 'Room Full' : 'Assign Satsangi'}
+                </Button>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      <Button onClick={handleAllocate} className="mt-4 bg-blue-600 text-white">
-        Allocate
-      </Button>
+      {selectedRoom && (
+        <div className="mt-8 p-4 bg-gray-50 rounded border">
+          {/* Your allocation form component or logic here */}
+          <p className="font-medium">Assigning satsangi to Room ID: {selectedRoom}</p>
+          {/* Include a satsangi dropdown + assign button here */}
+        </div>
+      )}
     </div>
   );
 }
