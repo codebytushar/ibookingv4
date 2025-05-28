@@ -2,8 +2,7 @@
 'use server';
 
 import { sql } from '@vercel/postgres';
-import { UUID } from 'crypto';
-import { redirect } from 'next/navigation';
+import { RoomAllocation } from '@/app/datatypes/custom';
 
 export async function getSatsangies() {
   const { rows } = await sql`
@@ -15,9 +14,12 @@ export async function getSatsangies() {
 }
 
 export async function getRoomsWithAllocations() {
-  const { rows } = await sql`
+  const  rooms  = await sql<RoomAllocation[]>`
     SELECT
-      r.id,
+    r.id,
+      r.room_no,
+      r.floor,
+      r.status,
       rt.description,
       rt.base_capacity,
       rt.extra_capacity,
@@ -26,7 +28,7 @@ export async function getRoomsWithAllocations() {
     JOIN room_types rt ON r.room_type_id = rt.id
     LEFT JOIN allocations a ON a.room_id = r.id
     GROUP BY r.id, rt.description, rt.base_capacity, rt.extra_capacity
+    order by r.floor, r.room_no
   `;
-
-  return rows;
+  return rooms.rows;
 }

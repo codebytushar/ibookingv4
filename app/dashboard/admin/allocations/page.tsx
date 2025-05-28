@@ -1,33 +1,15 @@
 'use server';
 
-import { getRoomsWithAllocations, getSatsangies } from './data'
+import { getRoomsWithAllocations } from './data'
 import RoomAllocationPage from '@/app/ui/allocations/RoomAllocationPage';
-
+import {RoomAllocation} from '@/app/datatypes/custom';
 export default async function Page() {
 
-type Room = {
-  id: string;
-  description: string;
-  room_no: string;
-  floor: number;
-  base_capacity: number;
-  extra_capacity: number;
-  total_allocated: number;
-};
 
-const rawRooms = await getRoomsWithAllocations();
+const rooms = await getRoomsWithAllocations();
+const flatRooms = rooms.flat();
 
-const rooms = rawRooms.map((room) => ({
-  id: String(room.id),
-  description: String(room.description),
-  base_capacity: Number(room.base_capacity),
-  extra_capacity: Number(room.extra_capacity),
-  total_allocated: Number(room.total_allocated),
-  room_no: String(room.room_no),
-  floor: Number(room.floor),
-}));
-
-  return <RoomAllocationPage rooms={rooms} />;
+  return <RoomAllocationPage rooms={flatRooms} />;
 }
 
 // Extract client part below:
