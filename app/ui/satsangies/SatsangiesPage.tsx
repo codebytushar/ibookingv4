@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { createSatsangi, deleteSatsangi } from '@/app/dashboard/admin/satsangies/actions';
+import { checkInSatsangi, checkOutSatsangi, createSatsangi, deleteSatsangi } from '@/app/dashboard/admin/satsangies/actions';
 import toast, { Toaster } from 'react-hot-toast';
 import SatsangiesImport from './SatsangiesImport';
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { LogIn, LogOut } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -36,16 +37,16 @@ export default function SatsangiesPage({
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-const filtered = satsangies.filter((s) => {
-  const searchTerm = search.toLowerCase();
-  return (
-    (s.name && s.name.toLowerCase().includes(searchTerm)) ||
-    (s.city && s.city.toLowerCase().includes(searchTerm)) ||
-    (s.gender && s.gender.toLowerCase().includes(searchTerm)) ||
-    (s.room_no !== null && s.room_no !== undefined && s.room_no.toString().toLowerCase().includes(searchTerm)) ||
-    (s.age !== null && s.age !== undefined && s.age.toString().includes(searchTerm))
-  );
-});
+  const filtered = satsangies.filter((s) => {
+    const searchTerm = search.toLowerCase();
+    return (
+      (s.name && s.name.toLowerCase().includes(searchTerm)) ||
+      (s.city && s.city.toLowerCase().includes(searchTerm)) ||
+      (s.gender && s.gender.toLowerCase().includes(searchTerm)) ||
+      (s.room_no !== null && s.room_no !== undefined && s.room_no.toString().toLowerCase().includes(searchTerm)) ||
+      (s.age !== null && s.age !== undefined && s.age.toString().includes(searchTerm))
+    );
+  });
 
 
 
@@ -73,6 +74,7 @@ const filtered = satsangies.filter((s) => {
                 <TableHead className="text-white">City</TableHead>
                 <TableHead className="text-white">Gender</TableHead>
                 <TableHead className="text-white">Room No.</TableHead>
+                <TableHead className="text-white">CI/CO</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -83,6 +85,29 @@ const filtered = satsangies.filter((s) => {
                   <TableCell>{s.city}</TableCell>
                   <TableCell>{s.gender}</TableCell>
                   <TableCell>{s.room_no}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={async () => {
+                          await checkInSatsangi(s.satsangi_id);
+                          toast.success("Checked In");
+                        }}
+                        className="text-green-600 hover:text-green-800"
+                      >
+                        <LogIn className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={async () => {
+                          await checkOutSatsangi(s.satsangi_id);
+                          toast.success("Checked Out");
+                        }}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <LogOut className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </TableCell>
+
                 </TableRow>
               ))}
             </TableBody>

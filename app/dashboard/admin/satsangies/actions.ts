@@ -101,4 +101,19 @@ export async function unassignSatsangi(roomId: string, satsangiId: string) {
 
   return rows as { id: string; name: string }[];
 }  
+
+export async function checkInSatsangi(satsangiId: string) {
+  await sql`
+    INSERT INTO checked_in (satsangi_id, datetime)
+    VALUES (${satsangiId}, NOW())
+  `;
+}
+
+export async function checkOutSatsangi(satsangiId: string) {
+  await sql`
+    INSERT INTO checked_out (satsangi_id, datetime)
+    VALUES (${satsangiId}, NOW())
+  `;
+}
+
   
