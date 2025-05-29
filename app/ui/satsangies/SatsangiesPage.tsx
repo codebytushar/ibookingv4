@@ -86,27 +86,37 @@ export default function SatsangiesPage({
                   <TableCell>{s.gender}</TableCell>
                   <TableCell>{s.room_no}</TableCell>
                   <TableCell>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={async () => {
-                          await checkInSatsangi(s.satsangi_id);
-                          toast.success("Checked In");
-                        }}
-                        className="text-green-600 hover:text-green-800"
-                      >
-                        <LogIn className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={async () => {
-                          await checkOutSatsangi(s.satsangi_id);
-                          toast.success("Checked Out");
-                        }}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        <LogOut className="w-4 h-4" />
-                      </button>
-                    </div>
+                    {s.checked_out ? (
+                      <span className="text-gray-500 italic">Checked out</span>
+                    ) : (
+                      <div className="flex gap-2">
+                        {!s.checked_in && (
+                          <button
+                            onClick={async () => {
+                              await checkInSatsangi(s.satsangi_id);
+                              toast.success("Checked In");
+                            }}
+                            className="text-green-600 hover:text-green-800"
+                          >
+                            <LogIn className="w-4 h-4" />
+                          </button>
+                        )}
+                        {s.checked_in && (
+                          <button
+                            onClick={async () => {
+                              await checkOutSatsangi(s.satsangi_id);
+                              toast.success("Checked Out");
+                            }}
+                            className="text-red-600 hover:text-red-800"
+                          >
+                            <LogOut className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </TableCell>
+
+
 
                 </TableRow>
               ))}

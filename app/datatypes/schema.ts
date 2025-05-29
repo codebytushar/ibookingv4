@@ -70,4 +70,13 @@ export type CheckedOut = {
   datetime: string; // ISO date-time string
 }
 
+export type User = {
+  id: string; 
+  email: string;
+  password: string; // Hashed password
+  name: string;
+  role: 'admin' | 'user'; // Define roles as needed
+  created_at: string; // ISO date-time string
+}
+
 

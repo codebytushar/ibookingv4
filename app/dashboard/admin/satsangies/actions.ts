@@ -11,7 +11,7 @@ export async function getAllSatsangies() {
 }
 
 export async function getAllSatsangieswithRoomNo() {
-  const { rows } = await sql`SELECT * FROM satsangi_room_allocation`;
+  const { rows } = await sql`SELECT * FROM satsangi_cico ORDER BY room_no, name`;
   return rows;
 }
 
@@ -107,6 +107,7 @@ export async function checkInSatsangi(satsangiId: string) {
     INSERT INTO checked_in (satsangi_id, datetime)
     VALUES (${satsangiId}, NOW())
   `;
+  revalidatePath('/dashboard/admin/satsangies');
 }
 
 export async function checkOutSatsangi(satsangiId: string) {
@@ -114,6 +115,9 @@ export async function checkOutSatsangi(satsangiId: string) {
     INSERT INTO checked_out (satsangi_id, datetime)
     VALUES (${satsangiId}, NOW())
   `;
+  await sql`DELETE FROM checked_in WHERE satsangi_id = ${satsangiId}`;
+  await sql`DELETE FROM allocations WHERE satsangi_id = ${satsangiId}`;
+  revalidatePath('/dashboard/admin/satsangies');
 }
 
   

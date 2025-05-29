@@ -49,7 +49,7 @@ export default function Header() {
     <header className="bg-indigo-600/90 backdrop-blur-md text-white py-4 px-6 shadow-lg">
       <div className="flex justify-between items-center">
         {/* Title */}
-        <Link href="/" className="flex items-center space-x-2">
+        <Link href="/dashboard/admin" className="flex items-center space-x-2">
           <span className="text-xl font-semibold">Golokdham IBooking</span>
         </Link>
 

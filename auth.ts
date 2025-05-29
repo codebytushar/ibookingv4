@@ -3,7 +3,8 @@ import { authConfig } from './auth.config';
 import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
 import { sql } from '@vercel/postgres';
-import type { User } from '@/app/lib/definitions';
+// Update the path below to the actual location of your definitions file
+import type { User } from '@/app/datatypes/schema'; // Adjust the import path as necessary
 import bcrypt from 'bcryptjs';
 async function getUser(email: string): Promise<User | undefined> {
     try {
