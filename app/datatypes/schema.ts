@@ -71,12 +71,17 @@ export type CheckedOut = {
 }
 
 export type User = {
-  id: string; 
-  email: string;
-  password: string; // Hashed password
+  id: string;
   name: string;
-  role: 'admin' | 'user'; // Define roles as needed
-  created_at: string; // ISO date-time string
-}
+  email: string;
+  password: string;
+  role: string;
+  deptcode: string;
+  verifierEmail: string;
+  signupVerificationToken: string;
+  signupVerificationExpires: string;
+  userstatus: string;
+  batch: string;
+};
 
 

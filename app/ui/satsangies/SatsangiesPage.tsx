@@ -203,10 +203,10 @@ export default function SatsangiesPage({
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Input name="name" required placeholder="Name" />
-            <Input name="age" type="number" placeholder="Age" />
+            <Input name="age" required type="number" placeholder="Age" />
             <Input name="city" required placeholder="City" />
             <Input name="state" placeholder="State" />
-            <Input name="birthdate" type="date" />
+            <Input name="birthdate" type="date" placeholder='Birth Date'/>
             <Input name="panno" placeholder="PAN No." />
             <Input name="address" placeholder="Address" />
             <Input name="mobile" placeholder="Mobile" />
@@ -215,7 +215,7 @@ export default function SatsangiesPage({
             {/* Gender Select */}
             <div>
               <Label htmlFor="gender" className="mb-1 block">Gender</Label>
-              <Select name="gender">
+              <Select name="gender" required>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select Gender" />
                 </SelectTrigger>

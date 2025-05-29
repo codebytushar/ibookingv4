@@ -11,7 +11,7 @@ export async function getAllSatsangies() {
 }
 
 export async function getAllSatsangieswithRoomNo() {
-  const { rows } = await sql`SELECT * FROM satsangi_cico ORDER BY room_no, name`;
+  const { rows } = await sql`SELECT * FROM satsangi_cico order by room_no,age`;
   return rows;
 }
 

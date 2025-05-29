@@ -227,6 +227,27 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
                     </Tooltip>
                   </TooltipProvider> */}
 
+
+                  {/* Check-ins Icon */}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div
+                          className={`flex items-center gap-1 ${(room.checked_in_count ?? 0) >= room.base_capacity + room.extra_capacity
+                              ? 'text-red-600'
+                              : 'text-green-700'
+                            }`}
+                        >
+                          <CheckCircle className="w-5 h-5" />
+                          <span className="text-sm font-semibold">{room.checked_in_count}</span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{room.checked_in_count} satsangies checked in</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
                   {/* View Allocated */}
                   <TooltipProvider>
                     <Tooltip>

@@ -10,6 +10,7 @@ export type RoomAllocation = {
   extra_capacity: number;
   total_allocated: number;
   description: string; // Room type description
+  checked_in_count?: number; // Optional, if you want to track checked-in count
 };
 
 // Make sure to import or define Satsangi above this interface
