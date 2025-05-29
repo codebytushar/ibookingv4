@@ -1,26 +1,79 @@
-// app/components/Header.tsx
 'use client';
 
-import { signOut } from '@/auth';
-import { Button } from '@/components/ui/button';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { LogOut, PowerIcon } from 'lucide-react';
 import SignOutButton from './SignOut';
+import { getDashboardStats } from '@/app/dashboard/(overview)/actions';
+import {
+  Building,
+  Users,
+  ClipboardList,
+  LogIn,
+  DoorOpen,
+  DoorClosed,
+  HelpCircle,
+  XOctagon
+} from 'lucide-react';
 
 export default function Header() {
+  const [stats, setStats] = useState({
+    totalCapacity: 0,
+    registered: 0,
+    allocated: 0,
+    checkedIn: 0,
+    unregistered: 0,
+    actualAvailable: 0,
+    unallocatedSatsangies: 0
+  });
+
+  useEffect(() => {
+    async function fetchStats() {
+      const data = await getDashboardStats();
+      setStats(data);
+    }
+    fetchStats();
+  }, []);
+
+  const iconStats = [
+    { label: 'Total Capacity', value: stats.totalCapacity, icon: Building },
+    { label: 'Registered', value: stats.registered, icon: Users },
+    { label: 'Allocated', value: stats.allocated, icon: ClipboardList },
+    { label: 'Unallocated', value: stats.unallocatedSatsangies, icon: XOctagon },
+    { label: 'Checked In', value: stats.checkedIn, icon: LogIn },
+    { label: 'Available', value: stats.totalCapacity - stats.allocated, icon: DoorOpen },
+    { label: 'Actual Available', value: stats.actualAvailable, icon: DoorClosed },
+    { label: 'Unregistered', value: stats.unregistered, icon: HelpCircle }
+  ];
 
   return (
-    <header className="bg-indigo-600/90 backdrop-blur-md text-white py-4 px-6 flex justify-between items-center shadow-lg">
-      <Link href="/" className="flex items-center space-x-2">
-        {/* <img src="/images/logo.png" alt="Golokdham IBooking" className="h-8 w-auto" /> */}
-        <span className="text-xl font-semibold">Golokdham IBooking</span>
-      </Link>
-      <div className="flex items-center space-x-4">
-        {/* <Link href="/dashboard" className="text-white hover:text-indigo-200">
-          Dashboard
+    <header className="bg-indigo-600/90 backdrop-blur-md text-white py-4 px-6 shadow-lg">
+      <div className="flex justify-between items-center">
+        {/* Title */}
+        <Link href="/" className="flex items-center space-x-2">
+          <span className="text-xl font-semibold">Golokdham IBooking</span>
         </Link>
-         */}
-       <SignOutButton />
+
+        {/* Stats */}
+        <div className="hidden md:flex gap-6 px-6">
+          {iconStats.map(({ label, value, icon: Icon }) => (
+            <div key={label} className="flex items-center gap-2">
+              <Icon
+                className={`w-5 h-5 ${
+                  label === 'Unregistered' ? 'text-red-400' : 'text-white'
+                }`}
+              />
+              <div className="flex flex-col text-xs leading-tight">
+                <span className="font-medium">{value}</span>
+                <span className="text-white/80">{label}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Sign Out */}
+        <div className="flex items-center space-x-4">
+          <SignOutButton />
+        </div>
       </div>
     </header>
   );

@@ -58,4 +58,16 @@ export type Allocation = {
   satsangi_id: string;
 };
 
+export type CheckedIn = {
+  id: string;
+  satsangi_id: string;
+  datetime: string; // ISO date-time string
+}
+
+export type CheckedOut = {  
+  id: string;
+  satsangi_id: string;
+  datetime: string; // ISO date-time string
+}
+
 
