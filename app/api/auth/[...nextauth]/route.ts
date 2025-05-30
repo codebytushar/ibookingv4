@@ -1,6 +1,9 @@
+// app/api/auth/[...nextauth]/route.ts
 import NextAuth from 'next-auth';
-import { authOptions } from '@/auth'; // Adjust if your path is different
+import { authOptions } from '@/auth'; // Adjust this path if needed
 
 const handler = NextAuth(authOptions);
 
-export { handler as GET, handler as POST };
+// ✅ Export handlers for GET and POST (App Router expects this)
+export const GET = handler;
+export const POST = handler;
