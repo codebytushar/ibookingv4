@@ -3,6 +3,7 @@
 
 import { sql } from '@vercel/postgres';
 import { RoomAllocation } from '@/app/datatypes/custom';
+import { Satsangi } from '@/app/datatypes/schema';
 
 export async function getSatsangies() {
   const { rows } = await sql`
@@ -34,3 +35,16 @@ ORDER BY r.floor, r.room_no;
   `;
   return rooms.rows;
 }
+
+export async function getUnassignedSatsangies(): Promise<Satsangi[]> {
+  const result = await sql<Satsangi>`
+    SELECT s.id, s.name, s.city, s.age
+    FROM satsangies s
+    WHERE s.id NOT IN (
+      SELECT a.satsangi_id
+      FROM allocations a
+    )
+  `;
+  return result.rows;
+}
+

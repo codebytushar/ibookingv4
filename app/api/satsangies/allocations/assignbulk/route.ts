@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { revalidatePath } from 'next/cache';
 
 export async function POST(request: Request) {
   try {
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
       await sql`ROLLBACK`;
       throw err;
     }
-    
+    revalidatePath('/dashboard/admin/satsangies/allocations');
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json(

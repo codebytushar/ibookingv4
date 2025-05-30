@@ -24,7 +24,9 @@ import { X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast"; // Add toast hook
 import { Loader2 } from "lucide-react"; // Add loading icon
 import { getAllocatedSatsangies } from '@/app/dashboard/admin/satsangies/actions';
+import { getUnassignedSatsangies } from '@/app/dashboard/admin/allocations/data';
 import AllocatedSatsangiesDialog from './AllocatedSatsangiesDialog';
+import { assignbulk } from '@/app/dashboard/admin/allocations/actions';
 
 export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) {
   const [selectedRoom, setSelectedRoom] = useState<RoomAllocation | null>(null);
@@ -39,18 +41,6 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
   const [showAllocatedDialog, setShowAllocatedDialog] = useState(false); // Dialog B
   const [allocatedSatsangies, setAllocatedSatsangies] = useState<{ id: string; name: string }[]>([]);
 
-  const handleViewAllocated = async (room: RoomAllocation) => {
-    setSelectedRoom(room);
-    const ss = await getAllocatedSatsangies(room.id);
-    setAllocatedSatsangies(
-      ss.map((row: any) => ({
-        id: row.id,
-        name: row.name,
-      }))
-    );
-    setShowAllocatedDialog(true);
-  };
-
   useEffect(() => {
     if (selectedRoom) {
       fetchUnassignedSatsangies();
@@ -60,11 +50,10 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
   const fetchUnassignedSatsangies = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/satsangies/allocations/unassigned');
-      if (!response.ok) {
+      const data = await getUnassignedSatsangies();
+      if (!data) {
         throw new Error('Failed to fetch unassigned satsangies');
       }
-      const data = await response.json();
       setSatsangies(data);
       setFilteredSatsangies(data.filter((s: { id: string; }) => !selectedSatsangies.some(selected => selected.id === s.id)));
     } catch (error) {
@@ -88,11 +77,6 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
     setFilteredSatsangies(filtered);
   }, [searchTerm, satsangies, selectedSatsangies]);
 
-  const handleRoomSelect = (room: RoomAllocation) => {
-    setSelectedRoom(room);
-    setSelectedSatsangies([]);
-    setSearchTerm('');
-  };
 
   const handleCloseDialog = () => {
     setShowAssignDialog(false);
@@ -127,22 +111,14 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
 
   const handleAssign = async () => {
     if (!selectedRoom || selectedSatsangies.length === 0) return;
-
     setIsAssigning(true);
     try {
-      const response = await fetch('/api/satsangies/allocations/assignbulk', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          roomId: selectedRoom.id,
-          satsangiIds: selectedSatsangies.map(s => s.id)
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to assign satsangies');
+      const response = await assignbulk(
+        selectedRoom.id,
+        selectedSatsangies.map(s => s.id)
+      );
+      if (!response || !response.success) {
+        throw new Error(response.error || 'Failed to assign satsangies');
       }
 
       toast({
@@ -234,8 +210,8 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
                       <TooltipTrigger asChild>
                         <div
                           className={`flex items-center gap-1 ${(room.checked_in_count ?? 0) >= room.base_capacity + room.extra_capacity
-                              ? 'text-red-600'
-                              : 'text-green-700'
+                            ? 'text-red-600'
+                            : 'text-green-700'
                             }`}
                         >
                           <CheckCircle className="w-5 h-5" />
