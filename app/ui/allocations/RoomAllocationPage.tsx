@@ -27,6 +27,7 @@ import { getAllocatedSatsangies } from '@/app/dashboard/admin/satsangies/actions
 import { getUnassignedSatsangies } from '@/app/dashboard/admin/allocations/data';
 import AllocatedSatsangiesDialog from './AllocatedSatsangiesDialog';
 import { assignbulk } from '@/app/dashboard/admin/allocations/actions';
+import { revalidatePath } from 'next/cache';
 
 export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) {
   const [selectedRoom, setSelectedRoom] = useState<RoomAllocation | null>(null);
@@ -112,10 +113,23 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
   const handleAssign = async () => {
     if (!selectedRoom || selectedSatsangies.length === 0) return;
     setIsAssigning(true);
+    const selectedSatsangiesTemp =  selectedSatsangies.map(s => s.id); // Create a temporary copy
+    // Check if the selected room is full
+    const maxCapacity = selectedRoom.base_capacity + selectedRoom.extra_capacity;
+    const currentAllocation = selectedRoom.total_allocated + selectedSatsangiesTemp.length;
+    if (currentAllocation > maxCapacity) {
+      toast({
+        variant: "destructive",
+        title: "Room Full",
+        description: `Cannot assign ${selectedSatsangies.length} satsangi${selectedSatsangies.length !== 1 ? 's' : ''}. Room capacity reached.`,
+      });
+      setIsAssigning(false);
+      return;
+    }
     try {
       const response = await assignbulk(
         selectedRoom.id,
-        selectedSatsangies.map(s => s.id)
+        selectedSatsangiesTemp
       );
       if (!response || !response.success) {
         throw new Error(response.error || 'Failed to assign satsangies');
@@ -125,7 +139,8 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
         title: "Success",
         description: `Successfully assigned ${selectedSatsangies.length} satsangi${selectedSatsangies.length !== 1 ? 's' : ''} to Room #${selectedRoom.room_no}`,
       });
-      window.location.reload();
+      setSelectedSatsangies([]); // Clear selected satsangies after assignment
+      setSearchTerm(''); // Clear search term
     } catch (error) {
       console.error('Error assigning satsangies:', error);
       toast({
