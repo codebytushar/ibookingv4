@@ -16,7 +16,14 @@ export async function createRoomType(formData: FormData) {
   const extra_capacity = Number(formData.get('extra_capacity'));
   const property_id = formData.get('property_id') as string;
   const total_rooms = Number(formData.get('total_rooms'));
-
+  console.log('Creating Room Type:', {
+    id,
+    description,
+    base_capacity,
+    extra_capacity,
+    property_id,
+    total_rooms,
+  });
   await sql`
     INSERT INTO room_types (id, description, base_capacity, extra_capacity, property_id, total_rooms)
     VALUES (${id}, ${description}, ${base_capacity}, ${extra_capacity}, ${property_id}, ${total_rooms})

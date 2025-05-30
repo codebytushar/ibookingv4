@@ -23,9 +23,12 @@ export default function SatsangiesImport({ shivirs }: { shivirs: { id: string; o
       skipEmptyLines: true,
       complete: (results) => {
         const rows = results.data as any[];
-        const invalid = rows.some((row) => !row.name || !row.city);
+        console.log('Parsed CSV rows:', rows);
+        const invalid = rows.some((row) => !row.name || !row.city || !row.age || !row.gender);
         if (invalid) {
-          toast.error('Missing mandatory fields (name, city)');
+          toast.error('Missing mandatory fields (name, city, age, gender) in CSV');
+          setCsvData([]);
+          e.target.value = ''; // Clear the file input
           return;
         }
         setCsvData(rows);
@@ -61,6 +64,23 @@ export default function SatsangiesImport({ shivirs }: { shivirs: { id: string; o
 
   return (
     <div className="bg-white border p-6 rounded-lg shadow space-y-4 mt-4">
+     
+      <Button
+        className="mt-2"
+        variant="outline"
+        onClick={() => {
+          const csv = "name,city,age,gender\nJohn Doe,Ahmedabad,30,Male\nJohn Patel,Surat,28,Male";
+          const blob = new Blob([csv], { type: 'text/csv' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'satsangies-template.csv';
+          link.click();
+        }}
+      >
+        Download Template
+      </Button>
+
       <div className="space-y-2">
         <Label>Select Shivir</Label>
         <Select onValueChange={setSelectedShivirId}>
@@ -76,6 +96,7 @@ export default function SatsangiesImport({ shivirs }: { shivirs: { id: string; o
           </SelectContent>
         </Select>
       </div>
+
 
       <div>
         <Label className="text-sm font-medium mb-1 block">Upload CSV File</Label>

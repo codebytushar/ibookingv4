@@ -23,9 +23,17 @@ export default function RoomTypesImport({ properties }: { properties: { id: stri
       skipEmptyLines: true,
       complete: (results) => {
         const rows = results.data as any[];
-        const invalid = rows.some((row) => !row.description || !row.base_capacity);
+        const invalid = rows.some(
+          (row) =>
+            !row.description ||
+            !row.base_capacity ||
+            !row.extra_capacity ||
+            !row.total_rooms
+        );
         if (invalid) {
-          toast.error('Missing required fields (description, base_capacity)');
+          toast.error('Missing required fields (description, base_capacity, extra_capacity, total_rooms) in CSV');
+          setCsvData([]);
+          e.target.value = ''; // Clear the file input
           return;
         }
         setCsvData(rows);
@@ -59,8 +67,24 @@ export default function RoomTypesImport({ properties }: { properties: { id: stri
     }
   };
 
+  const handleDownloadTemplate = () => {
+    const csv = `description,base_capacity,extra_capacity,total_rooms
+Deluxe Room,2,1,5
+Suite,4,2,3`;
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'room-types-template.csv';
+    link.click();
+  };
+
   return (
     <div className="bg-white border p-6 rounded-lg shadow space-y-4 mt-4">
+      <Button variant="outline" onClick={handleDownloadTemplate}>
+        Download Template
+      </Button>
+
       <div className="space-y-2">
         <Label>Select Property</Label>
         <Select onValueChange={setSelectedPropertyId}>

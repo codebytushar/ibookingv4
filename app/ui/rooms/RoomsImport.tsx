@@ -59,8 +59,24 @@ export default function RoomsImport({ roomTypes }: { roomTypes: { id: string; de
     }
   };
 
+  const handleDownloadTemplate = () => {
+    const csv = `room_no,floor,status
+101,1,available
+102,1,occupied`;
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'rooms-template.csv';
+    link.click();
+  };
+
   return (
     <div className="bg-white border p-6 rounded-lg shadow space-y-4 mt-4">
+      <Button variant="outline" onClick={handleDownloadTemplate}>
+        Download Template
+      </Button>
+
       <div className="space-y-2">
         <Label>Select Room Type</Label>
         <Select onValueChange={setSelectedRoomTypeId}>
