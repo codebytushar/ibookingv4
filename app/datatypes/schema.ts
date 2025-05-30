@@ -84,4 +84,18 @@ export type User = {
   batch: string;
 };
 
+export type Snapshot = {
+  id: string;
+  created_at: string; // ISO date-time string
+  description: string | null;
+};
+
+export type Users = {
+  id: string;
+  name: string;
+  email: string;  
+  password: string;
+  created_at: string; // ISO date-time string
+  role: string;
+}
 

@@ -16,6 +16,8 @@ export default function Sidebar() {
     { name: 'Room Types', href: '/dashboard/admin/room_types' },
     { name: 'Rooms', href: '/dashboard/admin/rooms' },
     { name: 'Allocations', href: '/dashboard/admin/allocations' },
+    { name: 'Snapshots', href: '/dashboard/admin/snapshots' },
+    
     // { name: 'Checked In', href: '/checked_in/new' },
     // { name: 'Checked Out', href: '/checked_out/new' },
     // { name: 'Import Shivirs', href: '/shivirs/import' },
