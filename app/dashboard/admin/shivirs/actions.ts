@@ -1,6 +1,7 @@
 'use server';
 
 import { sql } from '@vercel/postgres';
+import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 export async function createShivir(formData: FormData) {
@@ -21,6 +22,10 @@ export async function createShivir(formData: FormData) {
 }
 
 export async function deleteShivir(id: number) {
-  await sql`DELETE FROM shivirs WHERE id = ${id}`;
-  redirect('/dashboard/admin/shivirs');
+  try {
+    await sql`DELETE FROM shivirs WHERE id = ${id}`;
+    revalidatePath('/dashboard/admin/shivirs');
+  } catch (error) {
+    throw error;
+  }
 }

@@ -26,8 +26,12 @@ export async function createRoomType(formData: FormData) {
 }
 
 export async function deleteRoomType(id: string) {
-  await sql`DELETE FROM room_types WHERE id = ${id}`;
-  revalidatePath('/dashboard/admin/room_types');
+  try {
+    await sql`DELETE FROM room_types WHERE id = ${id}`;
+    revalidatePath('/dashboard/admin/room_types');
+  } catch (error) {
+    throw error;
+  }
 }
 export async function updateRoomType(id: string, formData: FormData) {
   const description = formData.get('description') as string;

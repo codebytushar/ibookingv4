@@ -130,7 +130,7 @@ export default function SatsangiesPage({
           {/* Search */}
           <Input
             type="text"
-            placeholder="Search by name or city"
+            placeholder="Search here..."
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);

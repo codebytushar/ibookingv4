@@ -29,6 +29,10 @@ export async function createRoom(formData: FormData) {
 }
 
 export async function deleteRoom(id: string) {
-  await sql`DELETE FROM rooms WHERE id = ${id}`;
-  revalidatePath('/dashboard/admin/rooms');
+  try {
+    await sql`DELETE FROM rooms WHERE id = ${id}`;
+    revalidatePath('/dashboard/admin/rooms');
+  } catch (error) {
+    throw error;
+  }
 }

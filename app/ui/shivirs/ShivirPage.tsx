@@ -14,8 +14,12 @@ export default function ShivirPage({ shivirs }: { shivirs: any[] }) {
   const [showForm, setShowForm] = useState(false);
 
   async function handleDelete(id: number) {
-    await deleteShivir(id);
-    toast.success('Shivir deleted!');
+    try {
+      await deleteShivir(id);
+      toast.success('Shivir deleted!');
+    } catch (error) {
+      toast.error('Failed to delete shivir.' + (error instanceof Error ? `: ${error.message}` : ''));
+    }
   }
 
   return (

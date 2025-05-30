@@ -59,8 +59,12 @@ export default function RoomTypesPage({
                   <TableCell>
                     <form
                       action={async () => {
-                        await deleteRoomType(r.id);
-                        toast.success("Deleted successfully");
+                        try {
+                          await deleteRoomType(r.id);
+                          toast.success("Deleted successfully");
+                        } catch (error) {
+                          toast.error("Failed to delete : " + (error instanceof Error ? `: ${error.message}` : ''));
+                        }
                       }}
                     >
                       <Button variant="destructive" size="sm" type="submit">

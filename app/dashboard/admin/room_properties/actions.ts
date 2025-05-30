@@ -3,6 +3,7 @@
 
 import { sql } from '@vercel/postgres';
 import { UUID } from 'crypto';
+import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 export async function getAllRoomProperties() {
@@ -24,12 +25,17 @@ export async function createRoomProperty(formData: FormData) {
     VALUES (${shivir_id}, ${name}, ${address}, ${map_link}, ${city}, ${state}, ${pin})
   `;
 
-  redirect('/dashboard/admin/room_properties'); // Reload the page
+  revalidatePath('/dashboard/admin/room_properties'); // Reload the page
 }
 
 export async function deleteRoomProperty(id: number) {
-  await sql`DELETE FROM room_properties WHERE id = ${id}`;
-  redirect('/room-properties');
+  try {
+    await sql`DELETE FROM room_properties WHERE id = ${id}`;
+    revalidatePath('/dashboard/admin/room_properties'); // Reload the page
+  } catch (error) {
+    // Optionally, you can throw the error or handle it as needed
+    throw error;
+  }
 }
 
 export async function updateRoomProperty(id: number, formData: FormData) {

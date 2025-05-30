@@ -55,8 +55,12 @@ const [showImport, setShowImport] = useState(false);
                   <TableCell>
                     <form
                       action={async () => {
-                        await deleteRoom(room.id);
-                        toast.success("Deleted successfully");
+                        try {
+                          await deleteRoom(room.id);
+                          toast.success("Deleted successfully");
+                        } catch (error) {
+                          toast.error("Failed to delete room : " + (error instanceof Error ? error.message : 'Unknown error'));
+                        }
                       }}
                     >
                       <Button type="submit" variant="destructive" size="sm">

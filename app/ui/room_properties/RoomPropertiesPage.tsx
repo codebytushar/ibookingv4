@@ -71,8 +71,12 @@ const getShivirOccasion = (shivirId: string): string => {
                   <TableCell>
                     <form
                       action={async () => {
-                        await deleteRoomProperty(p.id);
-                        toast.success("Deleted successfully");
+                        try {
+                          await deleteRoomProperty(p.id);
+                          toast.success("Deleted successfully");
+                        } catch (error) {
+                          toast.error("Failed to delete property" + (error instanceof Error ? `: ${error.message}` : ''));
+                        }
                       }}
                     >
                       <Button variant="destructive" size="sm" type="submit">

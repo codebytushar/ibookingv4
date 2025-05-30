@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import SignOutButton from './SignOut';
-import { getDashboardStats } from '@/app/dashboard/(overview)/actions';
+import { getDashboardStats } from '@/app/dashboard/admin/actions';
 import {
   Building,
   Users,
@@ -29,10 +29,21 @@ export default function Header() {
   useEffect(() => {
     async function fetchStats() {
       const data = await getDashboardStats();
-      setStats(data);
+      if (data) {
+        setStats({
+          totalCapacity: data.totalCapacity ?? 0,
+          registered: data.registered ?? 0,
+          allocated: data.allocated ?? 0,
+          checkedIn: data.checkedIn ?? 0,
+          unregistered: data.unregistered ?? 0,
+          actualAvailable: data.actualAvailable ?? 0,
+          unallocatedSatsangies: data.unallocatedSatsangies ?? 0
+        });
+      }
     }
     fetchStats();
   }, []);
+
 
   const iconStats = [
     { label: 'Total Capacity', value: stats.totalCapacity, icon: Building },
@@ -58,9 +69,8 @@ export default function Header() {
           {iconStats.map(({ label, value, icon: Icon }) => (
             <div key={label} className="flex items-center gap-2">
               <Icon
-                className={`w-5 h-5 ${
-                  label === 'Unregistered' ? 'text-red-400' : 'text-white'
-                }`}
+                className={`w-5 h-5 ${label === 'Unregistered' ? 'text-red-400' : 'text-white'
+                  }`}
               />
               <div className="flex flex-col text-xs leading-tight">
                 <span className="font-medium">{value}</span>
