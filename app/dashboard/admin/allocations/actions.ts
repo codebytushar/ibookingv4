@@ -20,7 +20,7 @@ export async function assignbulk(
       `;
         }
         await sql`COMMIT`;
-        revalidatePath('/dashboard/admin/satsangies/allocations');
+        revalidatePath('/dashboard/admin', 'layout');
         return { success: true };
     } catch (error) {
         await sql`ROLLBACK`;

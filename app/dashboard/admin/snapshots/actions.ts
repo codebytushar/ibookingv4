@@ -3,6 +3,7 @@
 
 import { auth } from '@/auth';
 import { sql } from '@vercel/postgres';
+import { revalidatePath } from 'next/cache';
 
 
 
@@ -151,6 +152,8 @@ export async function restoreSnapshot(snapshotId: string) {
     FROM snapshot_checked_out
     WHERE snapshot_id = ${snapshotId}
   `;
+
+  revalidatePath('/dashboard/admin', 'layout');
 }
 
 export async function emptyDatabase() {
@@ -169,6 +172,7 @@ export async function emptyDatabase() {
     await sql`DELETE FROM room_properties;`;
     await sql`DELETE FROM satsangies;`;
     await sql`DELETE FROM shivirs;`;
+    revalidatePath('/dashboard/admin', 'layout');
     return { success: true };
   } catch (error: any) {
     console.error('Failed to empty database:', error);
