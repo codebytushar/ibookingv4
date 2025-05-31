@@ -16,7 +16,7 @@ import { useTransition } from 'react';
 import { Button } from "@/components/ui/button"
 import { Input } from '@/components/ui/input';
 import { Trash2 } from 'lucide-react';
-import { deleteSnapshot, restoreSnapshot } from '@/app/dashboard/admin/snapshots/actions';
+import { deleteSnapshot, restoreSnapshot, emptyDatabase } from '@/app/dashboard/admin/snapshots/actions';
 
 export default function SnapshotsPage({ snapshots }: { snapshots: any[] }) {
     const [search, setSearch] = useState('');
@@ -106,6 +106,31 @@ export default function SnapshotsPage({ snapshots }: { snapshots: any[] }) {
                     </TableBody>
                 </Table>
             </div>
+            <div className="flex justify-end">
+                <Button
+                    variant="destructive"
+                    onClick={async () => {
+                        const confirmed = confirm("⚠️ Are you sure you want to **empty the entire database**? This cannot be undone.");
+                        if (!confirmed) return;
+
+                        try {
+                            const result = await emptyDatabase();
+
+                            if (result.success) {
+                                toast.success("Database emptied successfully.");
+                                location.reload(); // or revalidate/fetch if you use SWR or React Query
+                            } else {
+                                toast.error(result.error || "Failed to empty the database.");
+                            }
+                        } catch (err) {
+                            toast.error("Unexpected error occurred.");
+                        }
+                    }}
+                >
+                    Empty Database
+                </Button>
+            </div>
+
         </div>
     );
 }

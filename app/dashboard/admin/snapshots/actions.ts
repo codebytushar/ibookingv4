@@ -1,5 +1,6 @@
 'use server';
 
+import { auth } from '@/auth';
 import { sql } from '@vercel/postgres';
 
 export async function getAllSnapshots() {
@@ -156,6 +157,30 @@ export async function restoreSnapshot(snapshotId: string) {
     FROM snapshot_checked_out
     WHERE snapshot_id = ${snapshotId}
   `;
+}
+
+export async function emptyDatabase() {
+  const session = await auth();
+  if (!session || session.user.role !== 'admin') {
+    return { success: false, error: 'Unauthorized' };
+  }
+  
+  try {
+    // Delete child → parent order to avoid FK constraint errors
+    await sql`DELETE FROM checked_out;`;
+    await sql`DELETE FROM checked_in;`;
+    await sql`DELETE FROM allocations;`;
+    await sql`DELETE FROM rooms;`;
+    await sql`DELETE FROM room_types;`;
+    await sql`DELETE FROM room_properties;`;
+    await sql`DELETE FROM satsangies;`;
+    await sql`DELETE FROM shivirs;`;
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Failed to empty database:', error);
+    return { success: false, error: error.message };
+  }
 }
 
 
