@@ -1,5 +1,6 @@
 // app/(protected)/room-properties/actions.ts
 export const revalidate = 0;
+export const fetchCache = 'force-no-store'
 import { sql } from '@vercel/postgres';
 import { RoomAllocation } from '@/app/datatypes/custom';
 import { Satsangi } from '@/app/datatypes/schema';
