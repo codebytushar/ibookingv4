@@ -1,5 +1,7 @@
+export const revalidate = 0;
 // app/(protected)/room-properties/data.ts
 import { sql } from '@vercel/postgres';
+
 
 export async function getAllRoomProperties() {
   const { rows } = await sql`

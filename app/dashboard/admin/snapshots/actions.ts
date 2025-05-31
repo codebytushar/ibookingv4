@@ -1,16 +1,10 @@
 'use server';
 
+
 import { auth } from '@/auth';
 import { sql } from '@vercel/postgres';
 
-export async function getAllSnapshots() {
-  const result = await sql`
-    SELECT id,  created_at, description
-    FROM snapshots
-    ORDER BY created_at DESC
-  `;
-  return result.rows;
-}
+
 
 export async function createSnapshot(formData: FormData) {
 
@@ -175,12 +169,12 @@ export async function emptyDatabase() {
     await sql`DELETE FROM room_properties;`;
     await sql`DELETE FROM satsangies;`;
     await sql`DELETE FROM shivirs;`;
-
     return { success: true };
   } catch (error: any) {
     console.error('Failed to empty database:', error);
     return { success: false, error: error.message };
   }
+
 }
 
 

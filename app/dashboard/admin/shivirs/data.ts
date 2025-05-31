@@ -1,3 +1,4 @@
+export const revalidate = 0;
 import { sql } from '@vercel/postgres';
 
 export async function getAllShivirs() {

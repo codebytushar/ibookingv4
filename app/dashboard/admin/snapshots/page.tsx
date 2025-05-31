@@ -1,4 +1,4 @@
-import { getAllSnapshots } from './actions';
+import { getAllSnapshots } from './data';
 import SnapshotsPage from '@/app/ui/snapshots/SnapshotsPage';
 
 export default async function Page() {

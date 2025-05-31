@@ -23,7 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast"; // Add toast hook
 import { Loader2 } from "lucide-react"; // Add loading icon
-import { getAllocatedSatsangies } from '@/app/dashboard/admin/satsangies/actions';
+import { getAllocatedSatsangies } from '@/app/dashboard/admin/satsangies/data';
 import { getUnassignedSatsangies } from '@/app/dashboard/admin/allocations/data';
 import AllocatedSatsangiesDialog from './AllocatedSatsangiesDialog';
 import { assignbulk } from '@/app/dashboard/admin/allocations/actions';

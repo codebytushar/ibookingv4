@@ -1,13 +1,10 @@
 'use server';
+
 import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
 
-export async function getAllRoomTypes() {
-  const { rows } = await sql`SELECT * FROM room_types`;
-  return rows;
-}
+
 
 export async function createRoomType(formData: FormData) {
   const id = uuidv4();

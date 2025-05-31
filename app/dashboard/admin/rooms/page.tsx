@@ -1,6 +1,6 @@
 'use server';
 
-import { getAllRooms, getAllRoomTypeOptions } from './actions';
+import { getAllRooms, getAllRoomTypeOptions } from './data';
 import RoomsPage from '@/app/ui/rooms/RoomsPage';
 
 export default async function Page() {

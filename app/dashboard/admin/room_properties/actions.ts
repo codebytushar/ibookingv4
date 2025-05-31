@@ -1,15 +1,13 @@
-// app/(protected)/room-properties/actions.ts
 'use server';
 
+// app/(protected)/room-properties/actions.ts
+
+
 import { sql } from '@vercel/postgres';
-import { UUID } from 'crypto';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-export async function getAllRoomProperties() {
-  const { rows } = await sql`SELECT * FROM room_properties`;
-  return rows;
-}
+
 
 export async function createRoomProperty(formData: FormData) {
   const shivir_id = formData.get('shivir_id') as string;

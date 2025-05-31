@@ -1,8 +1,9 @@
 'use server';
+// This file contains server actions for bulk allocation of satsangis to rooms
+// in a Next.js application using Vercel Postgres.
+
 
 import { sql } from '@vercel/postgres';
-import { RoomAllocation } from '@/app/datatypes/custom';
-import { Satsangi } from '@/app/datatypes/schema';
 import { revalidatePath } from 'next/cache';
 
 export async function assignbulk(

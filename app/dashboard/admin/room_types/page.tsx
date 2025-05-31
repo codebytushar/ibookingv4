@@ -1,7 +1,7 @@
 'use server';
 
-import { getAllRoomTypes } from './actions';
-import { getAllRoomProperties } from '@/app/dashboard/admin/room_properties/actions';
+import { getAllRoomTypes } from './data';
+import { getAllRoomProperties } from '@/app/dashboard/admin/room_properties/data';
 import RoomTypesPage from '@/app/ui/room_types/RoomTypesPage';
 
 export default async function Page() {

@@ -1,6 +1,5 @@
 // app/(protected)/room-properties/actions.ts
-'use server';
-
+export const revalidate = 0;
 import { sql } from '@vercel/postgres';
 import { RoomAllocation } from '@/app/datatypes/custom';
 import { Satsangi } from '@/app/datatypes/schema';
