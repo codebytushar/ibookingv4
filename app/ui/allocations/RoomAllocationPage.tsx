@@ -113,34 +113,21 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
   const handleAssign = async () => {
     if (!selectedRoom || selectedSatsangies.length === 0) return;
     setIsAssigning(true);
-    const selectedSatsangiesTemp =  selectedSatsangies.map(s => s.id); // Create a temporary copy
-    // Check if the selected room is full
-    const maxCapacity = selectedRoom.base_capacity + selectedRoom.extra_capacity;
-    const currentAllocation = selectedRoom.total_allocated + selectedSatsangiesTemp.length;
-    if (currentAllocation > maxCapacity) {
-      toast({
-        variant: "destructive",
-        title: "Room Full",
-        description: `Cannot assign ${selectedSatsangies.length} satsangi${selectedSatsangies.length !== 1 ? 's' : ''}. Room capacity reached.`,
-      });
-      setIsAssigning(false);
-      return;
-    }
     try {
       const response = await assignbulk(
         selectedRoom.id,
-        selectedSatsangiesTemp
+        selectedSatsangies.map(s => s.id)
       );
       if (!response || !response.success) {
         throw new Error(response.error || 'Failed to assign satsangies');
       }
-
       toast({
         title: "Success",
         description: `Successfully assigned ${selectedSatsangies.length} satsangi${selectedSatsangies.length !== 1 ? 's' : ''} to Room #${selectedRoom.room_no}`,
       });
       setSelectedSatsangies([]); // Clear selected satsangies after assignment
       setSearchTerm(''); // Clear search term
+      setShowAssignDialog(false); // Close the dialog
     } catch (error) {
       console.error('Error assigning satsangies:', error);
       toast({
