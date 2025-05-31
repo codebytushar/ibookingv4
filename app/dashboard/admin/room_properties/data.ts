@@ -1,5 +1,4 @@
-export const revalidate = 0;
-export const fetchCache = 'force-no-store'
+'use server';
 // app/(protected)/room-properties/data.ts
 import { sql } from '@vercel/postgres';
 
