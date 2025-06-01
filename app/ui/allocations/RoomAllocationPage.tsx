@@ -157,14 +157,14 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
             <div
               key={room.id}
               className={`border rounded-xl p-4 shadow flex flex-col justify-between space-y-4 ${available === 0
-                ? 'bg-red-200'
+                ? 'bg-amber-200'
                 : available === 1
-                  ? 'bg-red-100'
+                  ? 'bg-amber-100'
                   : available === 2
-                    ? 'bg-yellow-200'
+                    ? 'bg-gray-200'
                     : available === 3
-                      ? 'bg-yellow-100'
-                      : 'bg-green-200'
+                      ? 'bg-gray-100'
+                      : 'bg-indigo-200'
                 }`}
             >
               <div>

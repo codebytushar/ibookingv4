@@ -96,7 +96,7 @@ export default function SatsangiesPage({
                               await checkInSatsangi(s.satsangi_id);
                               toast.success("Checked In");
                             }}
-                            className="text-green-600 hover:text-green-800"
+                            className="text-indigo-600 hover:text-indigo-800"
                           >
                             <LogIn className="w-4 h-4" />
                           </button>
@@ -107,7 +107,7 @@ export default function SatsangiesPage({
                               await checkOutSatsangi(s.satsangi_id);
                               toast.success("Checked Out");
                             }}
-                            className="text-red-600 hover:text-red-800"
+                            className="text-amber-600 hover:text-amber-800"
                           >
                             <LogOut className="w-4 h-4" />
                           </button>
