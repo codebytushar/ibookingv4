@@ -27,7 +27,6 @@ import { getAllocatedSatsangies } from '@/app/dashboard/admin/satsangies/data';
 import { getUnassignedSatsangies } from '@/app/dashboard/admin/allocations/data';
 import AllocatedSatsangiesDialog from './AllocatedSatsangiesDialog';
 import { assignbulk } from '@/app/dashboard/admin/allocations/actions';
-import { revalidatePath } from 'next/cache';
 
 export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) {
   const [selectedRoom, setSelectedRoom] = useState<RoomAllocation | null>(null);

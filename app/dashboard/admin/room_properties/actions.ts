@@ -23,13 +23,13 @@ export async function createRoomProperty(formData: FormData) {
     VALUES (${shivir_id}, ${name}, ${address}, ${map_link}, ${city}, ${state}, ${pin})
   `;
 
-  revalidatePath('/dashboard/admin/room_properties'); // Reload the page
+ revalidatePath('/dashboard/admin', 'layout'); // Reload the page
 }
 
 export async function deleteRoomProperty(id: number) {
   try {
     await sql`DELETE FROM room_properties WHERE id = ${id}`;
-    revalidatePath('/dashboard/admin/room_properties'); // Reload the page
+    revalidatePath('/dashboard/admin', 'layout'); // Reload the page
   } catch (error) {
     // Optionally, you can throw the error or handle it as needed
     throw error;
@@ -57,6 +57,6 @@ export async function updateRoomProperty(id: number, formData: FormData) {
     WHERE id = ${id}
   `;
 
- redirect('/dashboardd/admin/room-properties'); // Reload the page
+revalidatePath('/dashboard/admin', 'layout');// Reload the page
 
 }

@@ -18,14 +18,14 @@ export async function createShivir(formData: FormData) {
     VALUES (${occasion}, ${startDate}, ${endDate}, ${city}, ${address}, ${mapLink})
   `;
 
-  redirect('/dashboard/admin/shivirs'); // Redirect to the shivirs list page after creation
+  revalidatePath('/dashboard/admin', 'layout'); // Redirect to the shivirs list page after creation
   
 }
 
 export async function deleteShivir(id: number) {
   try {
     await sql`DELETE FROM shivirs WHERE id = ${id}`;
-    revalidatePath('/dashboard/admin/shivirs');
+    revalidatePath('/dashboard/admin', 'layout');
   } catch (error) {
     throw error;
   }

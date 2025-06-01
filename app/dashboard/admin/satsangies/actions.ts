@@ -30,12 +30,12 @@ export async function createSatsangi(formData: FormData) {
     )
   `;
 
-  revalidatePath('/dashboard/admin/satsangies');
+  revalidatePath('/dashboard/admin', 'layout');
 }
 
 export async function deleteSatsangi(id: string) {
   await sql`DELETE FROM satsangies WHERE id = ${id}`;
-  revalidatePath('/dashboard/admin/satsangies');
+  revalidatePath('/dashboard/admin', 'layout');
 }
 
 
@@ -48,7 +48,7 @@ export async function unassignSatsangi(roomId: string, satsangiId: string) {
       WHERE room_id = ${roomId} AND satsangi_id = ${satsangiId};
     `;
 
-    revalidatePath('/dashboard/admin/allocations'); // change if your route is different
+    revalidatePath('/dashboard/admin', 'layout'); // change if your route is different
   } catch (error) {
     console.error('Failed to unassign satsangi:', error);
     throw error;
@@ -61,7 +61,7 @@ export async function checkInSatsangi(satsangiId: string) {
     INSERT INTO checked_in (satsangi_id, datetime)
     VALUES (${satsangiId}, NOW())
   `;
-  revalidatePath('/dashboard/admin/satsangies');
+  revalidatePath('/dashboard/admin', 'layout');
 }
 
 export async function checkOutSatsangi(satsangiId: string) {
@@ -71,7 +71,7 @@ export async function checkOutSatsangi(satsangiId: string) {
   `;
   await sql`DELETE FROM checked_in WHERE satsangi_id = ${satsangiId}`;
   await sql`DELETE FROM allocations WHERE satsangi_id = ${satsangiId}`;
-  revalidatePath('/dashboard/admin/satsangies');
+  revalidatePath('/dashboard/admin', 'layout');
 }
 
   

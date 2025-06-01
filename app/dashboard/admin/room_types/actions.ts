@@ -26,13 +26,13 @@ export async function createRoomType(formData: FormData) {
     VALUES (${id}, ${description}, ${base_capacity}, ${extra_capacity}, ${property_id}, ${total_rooms})
   `;
 
-  revalidatePath('/dashboard/admin/room_types');
+ revalidatePath('/dashboard/admin', 'layout');
 }
 
 export async function deleteRoomType(id: string) {
   try {
     await sql`DELETE FROM room_types WHERE id = ${id}`;
-    revalidatePath('/dashboard/admin/room_types');
+   revalidatePath('/dashboard/admin', 'layout');
   } catch (error) {
     throw error;
   }
@@ -55,5 +55,5 @@ export async function updateRoomType(id: string, formData: FormData) {
     WHERE id = ${id}
   `;
 
-  revalidatePath('/dashboard/admin/room_types');
+  revalidatePath('/dashboard/admin', 'layout');
 }

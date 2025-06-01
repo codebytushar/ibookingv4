@@ -67,6 +67,7 @@ await sql`
   SELECT ${snapshotId}, id, satsangi_id, (NOW()::date + datetime::time)
   FROM checked_out
 `;
+revalidatePath('/dashboard/admin', 'layout');
 }
 
 export async function deleteSnapshot(id: string) {
@@ -80,6 +81,7 @@ export async function deleteSnapshot(id: string) {
   await sql`DELETE FROM snapshot_shivirs WHERE snapshot_id = ${id}`;
   await sql`DELETE FROM snapshot_satsangies WHERE snapshot_id = ${id}`;
   await sql`DELETE FROM snapshots WHERE id = ${id}`;
+  revalidatePath('/dashboard/admin', 'layout');
 }
 
 export async function restoreSnapshot(snapshotId: string) {

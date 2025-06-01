@@ -18,13 +18,13 @@ export async function createRoom(formData: FormData) {
     VALUES (${id}, ${room_type_id}, ${room_no}, ${floor}, ${status})
   `;
 
-  revalidatePath('/dashboard/admin/rooms');
+  revalidatePath('/dashboard/admin', 'layout');
 }
 
 export async function deleteRoom(id: string) {
   try {
     await sql`DELETE FROM rooms WHERE id = ${id}`;
-    revalidatePath('/dashboard/admin/rooms');
+    revalidatePath('/dashboard/admin', 'layout');
   } catch (error) {
     throw error;
   }
