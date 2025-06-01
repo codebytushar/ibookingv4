@@ -36,6 +36,18 @@ export default function SatsangiesPage({
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [sortField, setSortField] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  function handleSort(field: string) {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  }
+
 
   const filtered = satsangies.filter((s) => {
     const searchTerm = search.toLowerCase();
@@ -48,11 +60,27 @@ export default function SatsangiesPage({
     );
   });
 
+  const sorted = [...filtered].sort((a, b) => {
+    if (!sortField) return 0;
+    const valA = a[sortField];
+    const valB = b[sortField];
+
+    if (valA === null || valA === undefined) return 1;
+    if (valB === null || valB === undefined) return -1;
+
+    if (typeof valA === 'number' && typeof valB === 'number') {
+      return sortDirection === 'asc' ? valA - valB : valB - valA;
+    }
+
+    return sortDirection === 'asc'
+      ? valA.toString().localeCompare(valB.toString())
+      : valB.toString().localeCompare(valA.toString());
+  });
 
 
   const totalPages = Math.ceil(filtered.length / rowsPerPage);
   const startIdx = (currentPage - 1) * rowsPerPage;
-  const paginated = filtered.slice(startIdx, startIdx + rowsPerPage);
+  const paginated = sorted.slice(startIdx, startIdx + rowsPerPage);
 
   function getShivirOccasion(shivirId: string): string {
     return shivirs.find(shivir => shivir.id === shivirId)?.occasion || '';
@@ -69,14 +97,28 @@ export default function SatsangiesPage({
           <Table>
             <TableHeader className="bg-gray-800">
               <TableRow>
-                <TableHead className="text-white">Name</TableHead>
-                <TableHead className="text-white">Age</TableHead>
-                <TableHead className="text-white">City</TableHead>
-                <TableHead className="text-white">Gender</TableHead>
-                <TableHead className="text-white">Room No.</TableHead>
+                <TableHead onClick={() => handleSort("name")} className="text-white cursor-pointer">
+                  Name {sortField === "name" ? (sortDirection === "asc" ? "↑" : "↓") : ""}
+                </TableHead>
+                <TableHead onClick={() => handleSort("age")} className="text-white cursor-pointer">
+                  Age {sortField === "age" ? (sortDirection === "asc" ? "↑" : "↓") : ""}
+                </TableHead>
+                <TableHead onClick={() => handleSort("city")} className="text-white cursor-pointer">
+                  City {sortField === "city" ? (sortDirection === "asc" ? "↑" : "↓") : ""}
+                </TableHead>
+                <TableHead onClick={() => handleSort("gender")} className="text-white cursor-pointer">
+                  Gender {sortField === "gender" ? (sortDirection === "asc" ? "↑" : "↓") : ""}
+                </TableHead>
+                <TableHead onClick={() => handleSort("room_no")} className="text-white cursor-pointer">
+                  Room No. {sortField === "room_no" ? (sortDirection === "asc" ? "↑" : "↓") : ""}
+                </TableHead>
+                <TableHead onClick={() => handleSort("payment_id")} className="text-white cursor-pointer">
+                  Payment ID {sortField === "payment_id" ? (sortDirection === "asc" ? "↑" : "↓") : ""}
+                </TableHead>
                 <TableHead className="text-white">CI/CO</TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
               {paginated.map((s) => (
                 <TableRow key={s.satsangi_id}>
@@ -85,6 +127,7 @@ export default function SatsangiesPage({
                   <TableCell>{s.city}</TableCell>
                   <TableCell>{s.gender}</TableCell>
                   <TableCell>{s.room_no}</TableCell>
+                  <TableCell>{s.payment_id ?? '-'}</TableCell>
                   <TableCell>
                     {s.checked_out ? (
                       <span className="text-gray-500 italic">Checked out</span>
@@ -157,6 +200,10 @@ export default function SatsangiesPage({
                 <SelectItem value="10">10</SelectItem>
                 <SelectItem value="25">25</SelectItem>
                 <SelectItem value="50">50</SelectItem>
+                <SelectItem value="150">150</SelectItem>
+                <SelectItem value="300">300</SelectItem>
+                <SelectItem value="500">500</SelectItem>
+                <SelectItem value="700">700</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -206,7 +253,7 @@ export default function SatsangiesPage({
             <Input name="age" required type="number" placeholder="Age" />
             <Input name="city" required placeholder="City" />
             <Input name="state" placeholder="State" />
-            <Input name="birthdate" type="date" placeholder='Birth Date'/>
+            <Input name="birthdate" type="date" placeholder='Birth Date' />
             <Input name="panno" placeholder="PAN No." />
             <Input name="address" placeholder="Address" />
             <Input name="mobile" placeholder="Mobile" />
