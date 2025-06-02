@@ -24,9 +24,9 @@ export default function SatsangiesImport({ shivirs }: { shivirs: { id: string; o
       complete: (results) => {
         const rows = results.data as any[];
         console.log('Parsed CSV rows:', rows);
-        const invalid = rows.some((row) => !row.name || !row.city || !row.age || !row.gender);
+        const invalid = rows.some((row) => !row.name || !row.city || !row.age || !row.gender || !row.payment_id);
         if (invalid) {
-          toast.error('Missing mandatory fields (name, city, age, gender) in CSV');
+          toast.error('Missing mandatory fields (name, city, age, gender, payment_id) in CSV');
           setCsvData([]);
           e.target.value = ''; // Clear the file input
           return;
@@ -57,6 +57,10 @@ export default function SatsangiesImport({ shivirs }: { shivirs: { id: string; o
     if (res.ok) {
       toast.success('Imported successfully');
       setCsvData([]);
+      setSelectedShivirId('');
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     } else {
       toast.error('Failed to import');
     }
@@ -69,7 +73,7 @@ export default function SatsangiesImport({ shivirs }: { shivirs: { id: string; o
         className="mt-2"
         variant="outline"
         onClick={() => {
-          const csv = "name,city,age,gender\nJohn Doe,Ahmedabad,30,Male\nJohn Patel,Surat,28,Male";
+            const csv = "name,city,age,gender,payment_id\nJohn Doe,Ahmedabad,30,Male,23432\nJohn Patel,Surat,28,Male,00000";
           const blob = new Blob([csv], { type: 'text/csv' });
           const url = URL.createObjectURL(blob);
           const link = document.createElement('a');

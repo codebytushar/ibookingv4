@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { v4 as uuidv4 } from 'uuid';
+import { revalidatePath } from 'next/cache';
 
 export async function POST(req: Request) {
   const satsangies = await req.json();
@@ -20,6 +21,8 @@ export async function POST(req: Request) {
         )
       `;
     }
+      revalidatePath('/dashboard/admin', 'layout');
+      
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('Import error:', err);

@@ -203,7 +203,6 @@ export default function SatsangiesPage({
                 <SelectItem value="150">150</SelectItem>
                 <SelectItem value="300">300</SelectItem>
                 <SelectItem value="500">500</SelectItem>
-                <SelectItem value="700">700</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -228,6 +227,14 @@ export default function SatsangiesPage({
           </div>
         </div>
       </div>
+      {/* Summary Section (after table, before buttons) */}
+      {/* <div className="bg-gray-100 rounded-lg p-4 mt-4 shadow flex flex-wrap gap-6 justify-between text-sm md:text-base">
+        <div><strong>Total Satsangies:</strong> {satsangies.length}</div>
+        <div><strong>Filtered:</strong> {filtered.length}</div>
+        <div><strong>Checked In:</strong> {satsangies.filter(s => s.checked_in && !s.checked_out).length}</div>
+        <div><strong>Checked Out:</strong> {satsangies.filter(s => s.checked_out).length}</div>
+      </div> */}
+
 
       <div className="flex flex-wrap gap-4">
         <Button variant="default" onClick={() => setShowForm(!showForm)}>
