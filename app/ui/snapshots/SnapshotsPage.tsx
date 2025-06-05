@@ -9,37 +9,103 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, Trash2 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import { createSnapshot } from '@/app/dashboard/admin/snapshots/actions';
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import { Input } from '@/components/ui/input';
-import { Trash2 } from 'lucide-react';
 import { deleteSnapshot, restoreSnapshot, emptyDatabase } from '@/app/dashboard/admin/snapshots/actions';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from "@/components/ui/dialog";
+
+// Predefined password (in a real app, this should be more secure)
+const ADMIN_PASSWORD = "GolokDham1007"; 
 
 export default function SnapshotsPage({ snapshots }: { snapshots: any[] }) {
     const [search, setSearch] = useState('');
+    const [password, setPassword] = useState('');
+    const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+    const [currentAction, setCurrentAction] = useState<{
+        type: 'restore' | 'delete' | 'empty' | 'create';
+        id?: string;
+        description?: string;
+    } | null>(null);
 
     const filtered = snapshots.filter((s) =>
         s.description.toLowerCase().includes(search.toLowerCase())
     );
+
+    const handleAction = async () => {
+        if (password !== ADMIN_PASSWORD) {
+            toast.error("Incorrect password");
+            return;
+        }
+
+        setShowPasswordDialog(false);
+        setPassword('');
+
+        try {
+            if (!currentAction) return;
+
+            switch (currentAction.type) {
+                case 'restore':
+                    if (!currentAction.id) return;
+                    await restoreSnapshot(currentAction.id);
+                    toast.success("Snapshot restored!");
+                    break;
+                case 'delete':
+                    if (!currentAction.id) return;
+                    await deleteSnapshot(currentAction.id);
+                    toast.success('Snapshot deleted');
+                    break;
+                case 'empty':
+                    await emptyDatabase();
+                    toast.success("Database emptied successfully.");
+                    break;
+                case 'create':
+                    if (!currentAction.description) return;
+                    await createSnapshot(currentAction.description);
+                    toast.success("Snapshot created successfully.");
+                    break;
+            }
+
+            location.reload();
+        } catch (err) {
+            toast.error(`Failed to perform action: ${err instanceof Error ? err.message : String(err)}`);
+        }
+    };
 
     return (
         <div className="space-y-6">
             <Toaster />
             <div className="bg-white border rounded-lg shadow p-6 space-y-4">
                 <h2 className="text-xl font-semibold">Snapshots</h2>
+                
                 {/* Snapshot Form */}
                 <form
-                    action={async (formData) => {
-                        await createSnapshot(formData);
-                        location.reload();
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.currentTarget);
+                        const description = formData.get('description') as string;
+                        
+                        setCurrentAction({
+                            type: 'create',
+                            description,
+                        });
+                        setShowPasswordDialog(true);
                     }}
                     className="bg-white p-4 rounded shadow space-y-4"
                 >
-                    <Input name="description" placeholder="Description" />
+                    <Input name="description" placeholder="Description" required />
                     <Button type="submit">Create Snapshot</Button>
                 </form>
+
                 <Input
                     type="text"
                     placeholder="Search snapshots..."
@@ -54,7 +120,6 @@ export default function SnapshotsPage({ snapshots }: { snapshots: any[] }) {
                             <TableHead className="text-white">Created</TableHead>
                             <TableHead className="text-white">Description</TableHead>
                             <TableHead className="text-white">Actions</TableHead>
-
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -62,21 +127,16 @@ export default function SnapshotsPage({ snapshots }: { snapshots: any[] }) {
                             <TableRow key={snap.id}>
                                 <TableCell>{new Date(snap.created_at).toLocaleString()}</TableCell>
                                 <TableCell>{snap.description || '—'}</TableCell>
-                                <TableCell>
+                                <TableCell className="flex space-x-2">
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        onClick={async () => {
-                                            const confirmDelete = confirm("Are you sure you want to delete this snapshot?");
-                                            if (!confirmDelete) return;
-
-                                            try {
-                                                await deleteSnapshot(snap.id);
-                                                toast.success('Snapshot deleted');
-                                                location.reload(); // or trigger re-fetch if using SWR/React Query
-                                            } catch (err) {
-                                                toast.error('Failed to delete snapshot');
-                                            }
+                                        onClick={() => {
+                                            setCurrentAction({
+                                                type: 'delete',
+                                                id: snap.id,
+                                            });
+                                            setShowPasswordDialog(true);
                                         }}
                                     >
                                         <Trash2 className="w-4 h-4 text-red-600" />
@@ -84,17 +144,12 @@ export default function SnapshotsPage({ snapshots }: { snapshots: any[] }) {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        onClick={async () => {
-                                            const confirmRestore = confirm("Restore this snapshot? This will overwrite current data.");
-                                            if (!confirmRestore) return;
-
-                                            try {
-                                                await restoreSnapshot(snap.id);
-                                                toast.success("Snapshot restored!");
-                                                location.reload();
-                                            } catch (err) {
-                                                toast.error("Failed to restore snapshot.");
-                                            }
+                                        onClick={() => {
+                                            setCurrentAction({
+                                                type: 'restore',
+                                                id: snap.id,
+                                            });
+                                            setShowPasswordDialog(true);
                                         }}
                                     >
                                         <RotateCcw className="w-4 h-4 text-blue-600" />
@@ -105,31 +160,58 @@ export default function SnapshotsPage({ snapshots }: { snapshots: any[] }) {
                     </TableBody>
                 </Table>
             </div>
+            
             <div className="flex justify-end">
                 <Button
                     variant="destructive"
-                    onClick={async () => {
-                        const confirmed = confirm("⚠️ Are you sure you want to **empty the entire database**? This cannot be undone.");
-                        if (!confirmed) return;
-
-                        try {
-                            const result = await emptyDatabase();
-
-                            if (result.success) {
-                                toast.success("Database emptied successfully.");
-                                location.reload(); // or revalidate/fetch if you use SWR or React Query
-                            } else {
-                                toast.error(result.error || "Failed to empty the database.");
-                            }
-                        } catch (err) {
-                            toast.error("Unexpected error occurred.");
-                        }
+                    onClick={() => {
+                        setCurrentAction({ type: 'empty' });
+                        setShowPasswordDialog(true);
                     }}
                 >
                     Empty Database
                 </Button>
             </div>
 
+            {/* Password Dialog */}
+            <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Confirm Action</DialogTitle>
+                        <DialogDescription>
+                            {currentAction?.type === 'restore' && 
+                                "Please enter the admin password to restore this snapshot."}
+                            {currentAction?.type === 'delete' && 
+                                "Please enter the admin password to delete this snapshot."}
+                            {currentAction?.type === 'empty' && 
+                                "Please enter the admin password to empty the database."}
+                            {currentAction?.type === 'create' && 
+                                "Please enter the admin password to create a snapshot."}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4">
+                        <Input
+                            type="password"
+                            placeholder="Admin password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            autoFocus
+                        />
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowPasswordDialog(false)}>
+                            Cancel
+                        </Button>
+                        <Button 
+                            variant="default" 
+                            onClick={handleAction}
+                            disabled={!password}
+                        >
+                            Confirm
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

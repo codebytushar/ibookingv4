@@ -7,10 +7,9 @@ import { revalidatePath } from 'next/cache';
 
 
 
-export async function createSnapshot(formData: FormData) {
+export async function createSnapshot(description: string | null){
 
 
-  const description = formData.get('description')?.toString() || null;
 
 const snapshot = await sql`
     INSERT INTO snapshots (id, description, created_at)
