@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { LogIn, LogOut } from "lucide-react";
+import { Users, LogIn, LogOut, DoorClosed } from "lucide-react"; // DoorClosed for unallocated
 import {
   Table,
   TableBody,
@@ -23,6 +23,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Satsangi } from '@/app/datatypes/schema';
 
 export default function SatsangiesPage({
   satsangies,
@@ -38,6 +39,9 @@ export default function SatsangiesPage({
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [filterMode, setFilterMode] = useState<'all' | 'checkedIn' | 'checkedOut' | 'unallocated'>('all');
+  const [editingSatsangi, setEditingSatsangi] = useState<Satsangi | null>(null);
+
 
   function handleSort(field: string) {
     if (sortField === field) {
@@ -49,7 +53,7 @@ export default function SatsangiesPage({
   }
 
 
-  const filtered = satsangies.filter((s) => {
+  let filtered = satsangies.filter((s) => {
     const searchTerm = search.toLowerCase();
     return (
       (s.name && s.name.toLowerCase().includes(searchTerm)) ||
@@ -59,6 +63,18 @@ export default function SatsangiesPage({
       (s.age !== null && s.age !== undefined && s.age.toString().includes(searchTerm))
     );
   });
+
+  filtered = filtered.filter((s) => {
+    if (filterMode === 'checkedIn') return s.checked_in && !s.checked_out;
+    if (filterMode === 'checkedOut') return s.checked_out;
+    if (filterMode === 'unallocated') return !s.room_no;
+    return true; // 'all'
+  });
+
+  const handleEditClick = (satsangi: Satsangi) => {
+    setEditingSatsangi(satsangi);
+  };
+
 
   const sorted = [...filtered].sort((a, b) => {
     if (!sortField) return 0;
@@ -82,10 +98,6 @@ export default function SatsangiesPage({
   const startIdx = (currentPage - 1) * rowsPerPage;
   const paginated = sorted.slice(startIdx, startIdx + rowsPerPage);
 
-  function getShivirOccasion(shivirId: string): string {
-    return shivirs.find(shivir => shivir.id === shivirId)?.occasion || '';
-  }
-
   return (
     <div className="space-y-6">
       <Toaster />
@@ -97,6 +109,7 @@ export default function SatsangiesPage({
           <Table>
             <TableHeader className="bg-gray-800">
               <TableRow>
+                <TableHead className="text-white text-center">#</TableHead>
                 <TableHead onClick={() => handleSort("name")} className="text-white cursor-pointer">
                   Name {sortField === "name" ? (sortDirection === "asc" ? "↑" : "↓") : ""}
                 </TableHead>
@@ -120,8 +133,9 @@ export default function SatsangiesPage({
             </TableHeader>
 
             <TableBody>
-              {paginated.map((s) => (
+              {paginated.map((s, index) => (
                 <TableRow key={s.satsangi_id}>
+                  <TableCell className="text-center">{startIdx + index + 1}</TableCell>
                   <TableCell>{s.name}</TableCell>
                   <TableCell>{s.age}</TableCell>
                   <TableCell>{s.city}</TableCell>
@@ -158,7 +172,7 @@ export default function SatsangiesPage({
                       </div>
                     )}
                   </TableCell>
-
+                
 
 
                 </TableRow>
@@ -228,12 +242,48 @@ export default function SatsangiesPage({
         </div>
       </div>
       {/* Summary Section (after table, before buttons) */}
-      {/* <div className="bg-gray-100 rounded-lg p-4 mt-4 shadow flex flex-wrap gap-6 justify-between text-sm md:text-base">
-        <div><strong>Total Satsangies:</strong> {satsangies.length}</div>
-        <div><strong>Filtered:</strong> {filtered.length}</div>
-        <div><strong>Checked In:</strong> {satsangies.filter(s => s.checked_in && !s.checked_out).length}</div>
-        <div><strong>Checked Out:</strong> {satsangies.filter(s => s.checked_out).length}</div>
-      </div> */}
+      <div className="bg-gray-100 rounded-lg p-4 mt-4 shadow flex flex-wrap gap-6 justify-between text-sm md:text-base">
+
+        {/* Show All */}
+        <div
+          className="flex items-center gap-1 cursor-pointer"
+          title="Show All"
+          onClick={() => setFilterMode('all')}
+        >
+          <Users className={`w-6 h-6 ${filterMode === 'all' ? "text-blue-800" : "text-gray-500"}`} />
+        </div>
+
+        {/* Checked In */}
+        <div
+          className="flex items-center gap-1 cursor-pointer"
+          title="Checked In"
+          onClick={() => setFilterMode('checkedIn')}
+        >
+          <LogIn className={`w-6 h-6 ${filterMode === 'checkedIn' ? "text-indigo-800" : "text-amber-600"}`} />
+        </div>
+
+        {/* Checked Out */}
+        <div
+          className="flex items-center gap-1 cursor-pointer"
+          title="Checked Out"
+          onClick={() => setFilterMode('checkedOut')}
+        >
+          <LogOut className={`w-6 h-6 ${filterMode === 'checkedOut' ? "text-amber-800" : "text-indigo-600"}`} />
+        </div>
+
+        {/* Unallocated */}
+        <div
+          className="flex items-center gap-1 cursor-pointer"
+          title="Unallocated (No Room)"
+          onClick={() => setFilterMode('unallocated')}
+        >
+          <DoorClosed className={`w-6 h-6 ${filterMode === 'unallocated' ? "text-red-800" : "text-gray-500"}`} />
+        </div>
+
+
+
+      </div>
+
 
 
       <div className="flex flex-wrap gap-4">
@@ -312,6 +362,8 @@ export default function SatsangiesPage({
           <SatsangiesImport shivirs={shivirs} />
         </div>
       )}
+
+      
     </div>
   );
 }
