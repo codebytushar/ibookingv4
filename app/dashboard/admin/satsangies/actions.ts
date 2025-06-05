@@ -38,9 +38,6 @@ export async function deleteSatsangi(id: string) {
   revalidatePath('/dashboard/admin', 'layout');
 }
 
-
-
-
 export async function unassignSatsangi(roomId: string, satsangiId: string) {
   try {
     await sql`
@@ -74,4 +71,44 @@ export async function checkOutSatsangi(satsangiId: string) {
   revalidatePath('/dashboard/admin', 'layout');
 }
 
-  
+export async function updateSatsangi(formData: FormData) {
+  console.log('Updating satsangi with form data:', formData);
+  const rawFormData = {
+    id: formData.get('id') as string,
+    payment_id: formData.get('payment_id') ? parseInt(formData.get('payment_id') as string) : null,
+    age: parseInt(formData.get('age') as string),
+    gender: formData.get('gender') as string,
+    city: formData.get('city') as string,
+    checked_in: formData.get('checked_in') === 'on',
+    checked_out: formData.get('checked_out') === 'on',
+  };
+
+  try {
+    await sql`
+      UPDATE satsangies 
+      SET 
+        payment_id = ${rawFormData.payment_id},
+        age = ${rawFormData.age},
+        gender = ${rawFormData.gender},
+        city = ${rawFormData.city}
+      WHERE id = ${rawFormData.id}
+    `;
+
+    if (rawFormData.checked_in && !rawFormData.checked_out) {
+      await checkInSatsangi(rawFormData.id);
+    } else if (rawFormData.checked_out) {
+      await checkOutSatsangi(rawFormData.id);
+    } else if (!rawFormData.checked_in && !rawFormData.checked_out) {
+      await sql`
+        DELETE FROM checked_in WHERE satsangi_id = ${rawFormData.id};
+      `;
+      await sql`
+        DELETE FROM checked_out WHERE satsangi_id = ${rawFormData.id};
+        `;
+    }
+    revalidatePath('/dashboard/admin', 'layout');
+  } catch (error) {
+    console.error('Failed to update satsangi:', error);
+    throw new Error('Failed to update satsangi');
+  }
+}  

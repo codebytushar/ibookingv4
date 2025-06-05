@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { checkInSatsangi, checkOutSatsangi, createSatsangi, deleteSatsangi } from '@/app/dashboard/admin/satsangies/actions';
+import { checkInSatsangi, checkOutSatsangi, createSatsangi, deleteSatsangi, updateSatsangi } from '@/app/dashboard/admin/satsangies/actions';
 import toast, { Toaster } from 'react-hot-toast';
 import SatsangiesImport from './SatsangiesImport';
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Users, LogIn, LogOut, DoorClosed } from "lucide-react"; // DoorClosed for unallocated
+import { Users, LogIn, LogOut, DoorClosed, Pencil } from "lucide-react"; // DoorClosed for unallocated
 import {
   Table,
   TableBody,
@@ -24,6 +24,12 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Satsangi } from '@/app/datatypes/schema';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function SatsangiesPage({
   satsangies,
@@ -42,6 +48,13 @@ export default function SatsangiesPage({
   const [filterMode, setFilterMode] = useState<'all' | 'checkedIn' | 'checkedOut' | 'unallocated'>('all');
   const [editingSatsangi, setEditingSatsangi] = useState<Satsangi | null>(null);
 
+  const handleEditClick = (satsangi: Satsangi) => {
+    setEditingSatsangi({
+      ...satsangi,
+      checked_in: !!satsangi.checked_in && !satsangi.checked_out,
+      checked_out: !!satsangi.checked_out,
+    });
+  };
 
   function handleSort(field: string) {
     if (sortField === field) {
@@ -71,9 +84,7 @@ export default function SatsangiesPage({
     return true; // 'all'
   });
 
-  const handleEditClick = (satsangi: Satsangi) => {
-    setEditingSatsangi(satsangi);
-  };
+
 
 
   const sorted = [...filtered].sort((a, b) => {
@@ -143,36 +154,49 @@ export default function SatsangiesPage({
                   <TableCell>{s.room_no}</TableCell>
                   <TableCell>{s.payment_id ?? '-'}</TableCell>
                   <TableCell>
-                    {s.checked_out ? (
-                      <span className="text-gray-500 italic">Checked out</span>
-                    ) : (
-                      <div className="flex gap-2">
+                    <div className="flex gap-4">
+                      {s.checked_out ? (
+                        <span className="text-gray-500 italic">Checked out</span>
+                      ) : (
+                        <>
+
                         {!s.checked_in && (
-                          <button
-                            onClick={async () => {
-                              await checkInSatsangi(s.satsangi_id);
-                              toast.success("Checked In");
-                            }}
-                            className="text-indigo-600 hover:text-indigo-800"
-                          >
-                            <LogIn className="w-4 h-4" />
-                          </button>
+                      <button
+                        onClick={async () => {
+                          await checkInSatsangi(s.satsangi_id);
+                          toast.success("Checked In");
+                        }}
+                        className="text-indigo-600 hover:text-indigo-800"
+                      >
+                        <LogIn className="w-4 h-4" />
+                      </button>
                         )}
-                        {s.checked_in && (
-                          <button
-                            onClick={async () => {
-                              await checkOutSatsangi(s.satsangi_id);
-                              toast.success("Checked Out");
-                            }}
-                            className="text-amber-600 hover:text-amber-800"
-                          >
-                            <LogOut className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
+                      {s.checked_in && (
+                        <button
+                          onClick={async () => {
+                            await checkOutSatsangi(s.satsangi_id);
+                            toast.success("Checked Out");
+                          }}
+                          className="text-amber-600 hover:text-amber-800"
+                        >
+                          <LogOut className="w-4 h-4" />
+                        </button>
+                      )}
+
+                   </>
                     )}
+                      <button
+                        onClick={() => handleEditClick(s)}
+                        className="text-blue-600 hover:text-blue-800"
+                        title="Edit"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                    </div>
+
+
                   </TableCell>
-                
+
 
 
                 </TableRow>
@@ -363,7 +387,99 @@ export default function SatsangiesPage({
         </div>
       )}
 
-      
+      {/* Edit Dialog */}
+      <Dialog open={!!editingSatsangi} onOpenChange={() => setEditingSatsangi(null)}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Edit Satsangi : {editingSatsangi?.name}</DialogTitle>
+          </DialogHeader>
+          {editingSatsangi && (
+            <form
+              action={async (formData) => {
+                try {
+                  formData.append('id', editingSatsangi.satsangi_id);
+                  await updateSatsangi(formData);
+                  toast.success("Satsangi updated successfully!");
+                  setEditingSatsangi(null);
+                  // You might want to add a refresh here or use optimistic updates
+                } catch (error) {
+                  toast.error("Failed to update satsangi");
+                }
+              }}
+              className="space-y-4"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="payment_id">Payment ID</Label>
+                  <Input
+                    name="payment_id"
+                    type="number"
+                    defaultValue={editingSatsangi.payment_id || ''}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="age">Age</Label>
+                  <Input
+                    name="age"
+                    type="number"
+                    required
+                    defaultValue={editingSatsangi.age}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    name="city"
+                    required
+                    defaultValue={editingSatsangi.city}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="gender">Gender</Label>
+                  <Select name="gender" defaultValue={editingSatsangi.gender}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="checked_in"
+                    name="checked_in"
+                    defaultChecked={editingSatsangi.checked_in}
+                  />
+                  <Label htmlFor="checked_in">Checked In</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="checked_out"
+                    name="checked_out"
+                    defaultChecked={editingSatsangi.checked_out}
+                  />
+                  <Label htmlFor="checked_out">Checked Out</Label>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setEditingSatsangi(null)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit">Save Changes</Button>
+              </div>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

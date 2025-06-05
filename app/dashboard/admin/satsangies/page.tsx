@@ -1,6 +1,6 @@
 'use server';
 
-import { getAllSatsangies, getAllSatsangieswithRoomNo, getAllShivirIds, getRoomsWithAllocations } from './data';
+import { getAllSatsangieswithRoomNo, getAllShivirIds } from './data';
 import SatsangiesPage from '@/app/ui/satsangies/SatsangiesPage';
 
 export default async function Page() {

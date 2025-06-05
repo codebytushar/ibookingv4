@@ -1,5 +1,6 @@
 export type Satsangi = {
   id: string;
+  satsangi_id: string; // Unique identifier for the satsangi
   name: string;
   age: number;
   city: string;
@@ -12,6 +13,9 @@ export type Satsangi = {
   gender: 'Male' | 'Female' | 'Other' | string;
   shivir_id: string | null;
   payment_id: number | null;
+  checked_in: boolean;
+  room_no: string | null; // Room number if assigned
+  checked_out: boolean;
 };
 
 export type Shivir = {
