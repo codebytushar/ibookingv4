@@ -29,3 +29,22 @@ export async function deleteRoom(id: string) {
     throw error;
   }
 }
+
+export async function updateRoom(id: string, formData: FormData) {
+  const room_type_id = formData.get('room_type_id') as string;
+  const room_no = formData.get('room_no') as string;
+  const floor = Number(formData.get('floor'));
+  const status = formData.get('status') as string;
+
+  await sql`
+    UPDATE rooms
+    SET
+      room_type_id = ${room_type_id},
+      room_no = ${room_no},
+      floor = ${floor},
+      status = ${status}
+    WHERE id = ${id}
+  `;
+
+  revalidatePath('/dashboard/admin', 'layout');
+} 

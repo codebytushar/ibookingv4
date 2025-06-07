@@ -1,6 +1,5 @@
 'use client';
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { Button } from "@/components/ui/button";
 import { RoomAllocation } from '@/app/datatypes/custom';
 import {
@@ -9,10 +8,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { UserPlus, Users, Ban, CheckCircle, XCircle } from "lucide-react";
+import { UserPlus, Users, Ban, CheckCircle, Trash2 } from "lucide-react";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -21,25 +19,34 @@ import { Input } from "@/components/ui/input";
 import { Satsangi } from '@/app/datatypes/schema';
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
-import { useToast } from "@/hooks/use-toast"; // Add toast hook
-import { Loader2 } from "lucide-react"; // Add loading icon
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 import { getAllocatedSatsangies } from '@/app/dashboard/admin/satsangies/data';
 import { getUnassignedSatsangies } from '@/app/dashboard/admin/allocations/data';
-import AllocatedSatsangiesDialog from './AllocatedSatsangiesDialog';
 import { assignbulk } from '@/app/dashboard/admin/allocations/actions';
+import { unassignSatsangi } from "@/app/dashboard/admin/satsangies/actions";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
 
-export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) {
+export default function RoomAllocationsPage({ rooms }: { rooms: RoomAllocation[] }) {
   const [selectedRoom, setSelectedRoom] = useState<RoomAllocation | null>(null);
   const [satsangies, setSatsangies] = useState<Satsangi[]>([]);
   const [filteredSatsangies, setFilteredSatsangies] = useState<Satsangi[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSatsangies, setSelectedSatsangies] = useState<Satsangi[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isAssigning, setIsAssigning] = useState(false); // New loading state for assignment
-  const { toast } = useToast(); // Initialize toast hook
-  const [showAssignDialog, setShowAssignDialog] = useState(false);      // Dialog A
-  const [showAllocatedDialog, setShowAllocatedDialog] = useState(false); // Dialog B
+  const [isAssigning, setIsAssigning] = useState(false);
+  const { toast } = useToast();
+  const [showAssignDialog, setShowAssignDialog] = useState(false);
+  const [showAllocatedDialog, setShowAllocatedDialog] = useState(false);
   const [allocatedSatsangies, setAllocatedSatsangies] = useState<{ id: string; name: string }[]>([]);
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     if (selectedRoom) {
@@ -76,7 +83,6 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
     );
     setFilteredSatsangies(filtered);
   }, [searchTerm, satsangies, selectedSatsangies]);
-
 
   const handleCloseDialog = () => {
     setShowAssignDialog(false);
@@ -124,9 +130,9 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
         title: "Success",
         description: `Successfully assigned ${selectedSatsangies.length} satsangi${selectedSatsangies.length !== 1 ? 's' : ''} to Room #${selectedRoom.room_no}`,
       });
-      setSelectedSatsangies([]); // Clear selected satsangies after assignment
-      setSearchTerm(''); // Clear search term
-      setShowAssignDialog(false); // Close the dialog
+      setSelectedSatsangies([]);
+      setSearchTerm('');
+      setShowAssignDialog(false);
     } catch (error) {
       console.error('Error assigning satsangies:', error);
       toast({
@@ -137,6 +143,30 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
     } finally {
       setIsAssigning(false);
     }
+  };
+
+  const handleUnassign = (satsangiId: string) => {
+    if (!window.confirm("Are you sure you want to unassign this satsangi?")) {
+      return;
+    }
+    startTransition(async () => {
+      try {
+        await unassignSatsangi(selectedRoom!.id, satsangiId);
+        const updated = await getAllocatedSatsangies(selectedRoom!.id);
+        setAllocatedSatsangies(updated);
+        toast({
+          title: "Success",
+          description: "Satsangi unassigned successfully.",
+        });
+      } catch (error) {
+        console.error('Error unassigning satsangi:', error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to unassign satsangi. Please try again.",
+        });
+      }
+    });
   };
 
   const getAvailableSlots = () => {
@@ -156,16 +186,17 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
           return (
             <div
               key={room.id}
-              className={`border rounded-xl p-4 shadow flex flex-col justify-between space-y-4 ${available === 0
-                ? 'bg-amber-200'
-                : available === 1
+              className={`border rounded-xl p-4 shadow flex flex-col justify-between space-y-4 ${
+                available === 0
+                  ? 'bg-amber-200'
+                  : available === 1
                   ? 'bg-amber-100'
                   : available === 2
-                    ? 'bg-gray-200'
-                    : available === 3
-                      ? 'bg-gray-100'
-                      : 'bg-indigo-200'
-                }`}
+                  ? 'bg-gray-200'
+                  : available === 3
+                  ? 'bg-gray-100'
+                  : 'bg-indigo-200'
+              }`}
             >
               <div>
                 <TooltipProvider>
@@ -182,38 +213,17 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
                 </TooltipProvider>
               </div>
 
-              {/* <div>
-                <p className={`text-sm font-medium ${isFull ? 'text-red-600' : 'text-green-600'}`}>
-                  {isFull ? 'Full' : 'Available'}
-                </p>
-              </div> */}
               <div>
                 <div className="flex gap-2 items-center justify-center">
-                  {/* <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        {isFull ? (
-                          <XCircle className="text-red-600 w-5 h-5" />
-                        ) : (
-                          <CheckCircle className="text-green-600 w-5 h-5" />
-                        )}
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{isFull ? "Room Full" : "Room Available"}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider> */}
-
-
-                  {/* Check-ins Icon */}
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div
-                          className={`flex items-center gap-1 ${(room.checked_in_count ?? 0) >= room.base_capacity + room.extra_capacity
-                            ? 'text-red-600'
-                            : 'text-green-700'
-                            }`}
+                          className={`flex items-center gap-1 ${
+                            (room.checked_in_count ?? 0) >= room.base_capacity + room.extra_capacity
+                              ? 'text-red-600'
+                              : 'text-green-700'
+                          }`}
                         >
                           <CheckCircle className="w-5 h-5" />
                           <span className="text-sm font-semibold">{room.checked_in_count}</span>
@@ -225,7 +235,6 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
                     </Tooltip>
                   </TooltipProvider>
 
-                  {/* View Allocated */}
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -248,7 +257,6 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
                     </Tooltip>
                   </TooltipProvider>
 
-                  {/* Assign / Full */}
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -270,19 +278,6 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
                     </Tooltip>
                   </TooltipProvider>
                 </div>
-
-                <AllocatedSatsangiesDialog
-                  open={showAllocatedDialog}
-                  onOpenChange={setShowAllocatedDialog}
-                  satsangies={allocatedSatsangies}
-                  roomId={selectedRoom?.id ?? ""}
-                  onSuccess={async () => {
-                    const updated = await getAllocatedSatsangies(selectedRoom!.id);
-                    setAllocatedSatsangies(updated);
-                  }}
-                />
-
-
               </div>
             </div>
           );
@@ -295,7 +290,6 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
             <DialogTitle>
               Assign Satsangies to Room #{selectedRoom?.room_no}
             </DialogTitle>
-
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div>
@@ -383,6 +377,53 @@ export default function AllocationsPage({ rooms }: { rooms: RoomAllocation[] }) 
                 )}
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showAllocatedDialog} onOpenChange={setShowAllocatedDialog}>
+        <DialogContent className="sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Allocated Satsangies for Room #{selectedRoom?.room_no}</DialogTitle>
+          </DialogHeader>
+
+          <div className="overflow-auto max-h-[400px] rounded-md border">
+            <Table>
+              <TableHeader className="bg-gray-800">
+                <TableRow>
+                  <TableHead className="text-white">Sr. No</TableHead>
+                  <TableHead className="text-white">Name</TableHead>
+                  <TableHead className="text-white">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {allocatedSatsangies.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={2} className="text-center text-gray-500">
+                      No satsangies allocated
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  allocatedSatsangies.map((s,index) => (
+                    <TableRow key={s.id}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{s.name}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleUnassign(s.id)}
+                          disabled={isPending}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           </div>
         </DialogContent>
       </Dialog>
