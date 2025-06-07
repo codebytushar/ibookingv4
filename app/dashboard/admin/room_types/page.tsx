@@ -10,7 +10,14 @@ export default async function Page() {
 
   return (
     <RoomTypesPage
-      roomTypes={roomTypes}
+      roomTypes={roomTypes.map((rt: any) => ({
+        id: String(rt.id),
+        description: String(rt.description),
+        base_capacity: Number(rt.base_capacity),
+        extra_capacity: Number(rt.extra_capacity),
+        total_rooms: Number(rt.total_rooms),
+        property_id: String(rt.property_id),
+      }))}
       properties={properties.map((p: any) => ({
         id: String(p.id),
         name: String(p.name),
