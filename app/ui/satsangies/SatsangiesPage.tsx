@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Users, LogIn, LogOut, DoorClosed, Pencil } from "lucide-react"; // DoorClosed for unallocated
+import { Users, LogIn, LogOut, DoorClosed, Pencil, XCircleIcon } from "lucide-react"; // DoorClosed for unallocated
 import {
   Table,
   TableBody,
@@ -45,14 +45,24 @@ export default function SatsangiesPage({
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [filterMode, setFilterMode] = useState<'all' | 'checkedIn' | 'checkedOut' | 'unallocated'>('all');
+  const [filterMode, setFilterMode] = useState<'all' | 'checkedIn' | 'checkedOut' | 'unallocated' | 'unregistered'>('all');
   const [editingSatsangi, setEditingSatsangi] = useState<Satsangi | null>(null);
+  const [checkStatus, setCheckStatus] = useState(() => {
+    if (editingSatsangi && editingSatsangi.checked_in) return "checkin";
+    if (editingSatsangi && editingSatsangi.checked_out) return "checkout";
+    return "clear";
+  });
 
   const handleEditClick = (satsangi: Satsangi) => {
     setEditingSatsangi({
       ...satsangi,
       checked_in: !!satsangi.checked_in && !satsangi.checked_out,
       checked_out: !!satsangi.checked_out,
+    });
+    setCheckStatus(() => {
+      if (satsangi.checked_in && !satsangi.checked_out) return "checkin";
+      if (satsangi.checked_out) return "checkout";
+      return "clear";
     });
   };
 
@@ -73,14 +83,17 @@ export default function SatsangiesPage({
       (s.city && s.city.toLowerCase().includes(searchTerm)) ||
       (s.gender && s.gender.toLowerCase().includes(searchTerm)) ||
       (s.room_no !== null && s.room_no !== undefined && s.room_no.toString().toLowerCase().includes(searchTerm)) ||
-      (s.age !== null && s.age !== undefined && s.age.toString().includes(searchTerm))
+      (s.age !== null && s.age !== undefined && s.age.toString().includes(searchTerm)) ||
+      (s.payment_id !== null && s.payment_id !== undefined && s.payment_id.toString().includes(searchTerm))
     );
   });
 
   filtered = filtered.filter((s) => {
+
     if (filterMode === 'checkedIn') return s.checked_in && !s.checked_out;
     if (filterMode === 'checkedOut') return s.checked_out;
     if (filterMode === 'unallocated') return !s.room_no;
+    if (filterMode === 'unregistered') return s.payment_id == 99999; // Assuming 99999 is the unregistered payment ID
     return true; // 'all'
   });
 
@@ -160,31 +173,31 @@ export default function SatsangiesPage({
                       ) : (
                         <>
 
-                        {!s.checked_in && (
-                      <button
-                        onClick={async () => {
-                          await checkInSatsangi(s.satsangi_id);
-                          toast.success("Checked In");
-                        }}
-                        className="text-indigo-600 hover:text-indigo-800"
-                      >
-                        <LogIn className="w-4 h-4" />
-                      </button>
-                        )}
-                      {s.checked_in && (
-                        <button
-                          onClick={async () => {
-                            await checkOutSatsangi(s.satsangi_id);
-                            toast.success("Checked Out");
-                          }}
-                          className="text-amber-600 hover:text-amber-800"
-                        >
-                          <LogOut className="w-4 h-4" />
-                        </button>
-                      )}
+                          {!s.checked_in && (
+                            <button
+                              onClick={async () => {
+                                await checkInSatsangi(s.satsangi_id);
+                                toast.success("Checked In");
+                              }}
+                              className="text-indigo-600 hover:text-indigo-800"
+                            >
+                              <LogIn className="w-4 h-4" />
+                            </button>
+                          )}
+                          {s.checked_in && (
+                            <button
+                              onClick={async () => {
+                                await checkOutSatsangi(s.satsangi_id);
+                                toast.success("Checked Out");
+                              }}
+                              className="text-amber-600 hover:text-amber-800"
+                            >
+                              <LogOut className="w-4 h-4" />
+                            </button>
+                          )}
 
-                   </>
-                    )}
+                        </>
+                      )}
                       <button
                         onClick={() => handleEditClick(s)}
                         className="text-blue-600 hover:text-blue-800"
@@ -304,6 +317,15 @@ export default function SatsangiesPage({
           <DoorClosed className={`w-6 h-6 ${filterMode === 'unallocated' ? "text-red-800" : "text-gray-500"}`} />
         </div>
 
+          {/* UnRegistered  */}
+        <div
+          className="flex items-center gap-1 cursor-pointer"
+          title="Not Registered (payment_id is 99999)"
+          onClick={() => setFilterMode('unregistered')}
+        >
+          <XCircleIcon className={`w-6 h-6 ${filterMode === 'unregistered' ? "text-red-800" : "text-gray-500"}`} />
+        </div>
+
 
 
       </div>
@@ -415,6 +437,7 @@ export default function SatsangiesPage({
                     name="payment_id"
                     type="number"
                     defaultValue={editingSatsangi.payment_id || ''}
+                    required
                   />
                 </div>
                 <div>
@@ -424,6 +447,7 @@ export default function SatsangiesPage({
                     type="number"
                     required
                     defaultValue={editingSatsangi.age}
+                    
                   />
                 </div>
                 <div>
@@ -447,24 +471,44 @@ export default function SatsangiesPage({
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="checked_in"
-                    name="checked_in"
-                    defaultChecked={editingSatsangi.checked_in}
-                  />
-                  <Label htmlFor="checked_in">Checked In</Label>
+                <div className="space-y-2">
+                  <Label className="font-semibold">Status</Label>
+                  <div className="flex flex-col space-y-2">
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        name="check_status"
+                        value="checkin"
+                        checked={checkStatus === "checkin"}
+                        onChange={() => setCheckStatus("checkin")}
+                      />
+                      <span>Checked In</span>
+                    </label>
+
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        name="check_status"
+                        value="checkout"
+                        checked={checkStatus === "checkout"}
+                        onChange={() => setCheckStatus("checkout")}
+                      />
+                      <span>Checked Out</span>
+                    </label>
+
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        name="check_status"
+                        value="clear"
+                        checked={checkStatus === "clear"}
+                        onChange={() => setCheckStatus("clear")}
+                      />
+                      <span>Clear Check In / Check Out</span>
+                    </label>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="checked_out"
-                    name="checked_out"
-                    defaultChecked={editingSatsangi.checked_out}
-                  />
-                  <Label htmlFor="checked_out">Checked Out</Label>
-                </div>
+
               </div>
               <div className="flex justify-end gap-2">
                 <Button

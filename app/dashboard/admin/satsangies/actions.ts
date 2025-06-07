@@ -3,6 +3,7 @@
 import { sql } from '@vercel/postgres';
 import { v4 as uuidv4 } from 'uuid';
 import { revalidatePath } from 'next/cache';
+import { clear } from 'console';
 
 export async function createSatsangi(formData: FormData) {
   const id = uuidv4();
@@ -75,14 +76,15 @@ export async function updateSatsangi(formData: FormData) {
   console.log('Updating satsangi with form data:', formData);
   const rawFormData = {
     id: formData.get('id') as string,
-    payment_id: formData.get('payment_id') ? parseInt(formData.get('payment_id') as string) : null,
+    payment_id: formData.get('payment_id') as string,
     age: parseInt(formData.get('age') as string),
     gender: formData.get('gender') as string,
     city: formData.get('city') as string,
-    checked_in: formData.get('checked_in') === 'on',
-    checked_out: formData.get('checked_out') === 'on',
+    checked_in: formData.get('check_status') === 'checkin',
+    checked_out: formData.get('checked_out') === 'checkout',
+    clear: formData.get('check_status') === 'clear',
   };
-
+console.log('Parsed raw form data:', rawFormData);
   try {
     await sql`
       UPDATE satsangies 
@@ -95,8 +97,14 @@ export async function updateSatsangi(formData: FormData) {
     `;
 
     if (rawFormData.checked_in && !rawFormData.checked_out) {
+       await sql`
+        DELETE FROM checked_in WHERE satsangi_id = ${rawFormData.id};
+      `;
       await checkInSatsangi(rawFormData.id);
     } else if (rawFormData.checked_out) {
+       await sql`
+        DELETE FROM checked_out WHERE satsangi_id = ${rawFormData.id};
+        `;
       await checkOutSatsangi(rawFormData.id);
     } else if (!rawFormData.checked_in && !rawFormData.checked_out) {
       await sql`

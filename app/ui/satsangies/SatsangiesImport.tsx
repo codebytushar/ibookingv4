@@ -73,7 +73,7 @@ export default function SatsangiesImport({ shivirs }: { shivirs: { id: string; o
         className="mt-2"
         variant="outline"
         onClick={() => {
-            const csv = "name,city,age,gender,payment_id\nJohn Doe,Ahmedabad,30,Male,23432\nJohn Patel,Surat,28,Male,00000";
+            const csv = "name,city,age,gender,payment_id\nJohn Doe,Ahmedabad,30,Male,23432\nJohn Patel,Surat,28,Male,99999";
           const blob = new Blob([csv], { type: 'text/csv' });
           const url = URL.createObjectURL(blob);
           const link = document.createElement('a');

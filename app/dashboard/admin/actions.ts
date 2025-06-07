@@ -24,7 +24,7 @@ export async function getDashboardStats() {
         sql`SELECT COUNT(*) AS value FROM satsangies WHERE payment_id IS NOT NULL`,
         sql`SELECT COUNT(DISTINCT satsangi_id) AS value FROM allocations`,
         sql`SELECT COUNT(DISTINCT satsangi_id) AS value FROM checked_in`,
-        sql`SELECT COUNT(*) AS value FROM satsangies WHERE payment_id IS NULL`,
+        sql`SELECT COUNT(*) AS value FROM satsangies WHERE payment_id = 99999`,
         sql`
   WITH capacities AS (
     SELECT 
