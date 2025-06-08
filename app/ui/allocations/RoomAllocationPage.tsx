@@ -47,6 +47,24 @@ export default function RoomAllocationsPage({ rooms }: { rooms: RoomAllocation[]
   const [showAllocatedDialog, setShowAllocatedDialog] = useState(false);
   const [allocatedSatsangies, setAllocatedSatsangies] = useState<{ id: string; name: string }[]>([]);
   const [isPending, startTransition] = useTransition();
+  // Inside the component:
+  const [showRoomStatsDialog, setShowRoomStatsDialog] = useState(false);
+
+
+const roomStats = rooms.map((room) => {
+  const allocated = room.total_allocated
+  const total = room.base_capacity + room.extra_capacity;
+  return {
+    roomNo: room.room_no,
+    base: room.base_capacity,
+    extra: room.extra_capacity,
+    total,
+    allocated,
+    available: total - allocated,
+  };
+});
+const sortedRoomStats = [...roomStats].sort((a, b) => b.available - a.available);
+  
 
   useEffect(() => {
     if (selectedRoom) {
@@ -177,6 +195,13 @@ export default function RoomAllocationsPage({ rooms }: { rooms: RoomAllocation[]
 
   return (
     <div className="space-y-2 p-6 bg-gray-100 rounded-lg shadow">
+       <div className="flex justify-between items-center mb-4">
+      <h2 className="text-xl font-bold">Room Allocations</h2>
+      <Button onClick={() => setShowRoomStatsDialog(true)}>
+        View Room Stats
+      </Button>
+    </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 gap-6">
         {rooms.map((room) => {
           const maxCapacity = room.base_capacity + room.extra_capacity;
@@ -186,17 +211,16 @@ export default function RoomAllocationsPage({ rooms }: { rooms: RoomAllocation[]
           return (
             <div
               key={room.id}
-              className={`border rounded-xl p-4 shadow flex flex-col justify-between space-y-4 ${
-                available === 0
+              className={`border rounded-xl p-4 shadow flex flex-col justify-between space-y-4 ${available === 0
                   ? 'bg-amber-200'
                   : available === 1
-                  ? 'bg-amber-100'
-                  : available === 2
-                  ? 'bg-gray-200'
-                  : available === 3
-                  ? 'bg-gray-100'
-                  : 'bg-indigo-200'
-              }`}
+                    ? 'bg-amber-100'
+                    : available === 2
+                      ? 'bg-gray-200'
+                      : available === 3
+                        ? 'bg-gray-100'
+                        : 'bg-indigo-200'
+                }`}
             >
               <div>
                 <TooltipProvider>
@@ -219,11 +243,10 @@ export default function RoomAllocationsPage({ rooms }: { rooms: RoomAllocation[]
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div
-                          className={`flex items-center gap-1 ${
-                            (room.checked_in_count ?? 0) >= room.base_capacity + room.extra_capacity
+                          className={`flex items-center gap-1 ${(room.checked_in_count ?? 0) >= room.base_capacity + room.extra_capacity
                               ? 'text-red-600'
                               : 'text-green-700'
-                          }`}
+                            }`}
                         >
                           <CheckCircle className="w-5 h-5" />
                           <span className="text-sm font-semibold">{room.checked_in_count}</span>
@@ -283,6 +306,43 @@ export default function RoomAllocationsPage({ rooms }: { rooms: RoomAllocation[]
           );
         })}
       </div>
+
+       <Dialog open={showRoomStatsDialog} onOpenChange={setShowRoomStatsDialog}>
+      <DialogContent className="sm:max-w-5xl">
+        <DialogHeader>
+          <DialogTitle>Room Statistics</DialogTitle>
+        </DialogHeader>
+        <div className="overflow-auto max-h-[500px]">
+          <Table>
+  <TableHeader className="bg-gray-800">
+    <TableRow>
+      <TableHead className="text-white">Room No</TableHead>
+      <TableHead className="text-white">Base Capacity</TableHead>
+      <TableHead className="text-white">Extra Capacity</TableHead>
+      <TableHead className="text-white">Total Capacity</TableHead>
+      <TableHead className="text-white">Allocated</TableHead>
+      <TableHead className="text-white">Available</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    {sortedRoomStats.map((room, index) => (
+      <TableRow key={index}>
+        <TableCell>{room.roomNo}</TableCell>
+        <TableCell>{room.base}</TableCell>
+        <TableCell>{room.extra}</TableCell>
+        <TableCell>{room.total}</TableCell>
+        <TableCell>{room.allocated}</TableCell>
+        <TableCell>{room.available}</TableCell>
+      </TableRow>
+    ))}
+  </TableBody>
+</Table>
+
+        </div>
+
+     
+      </DialogContent>
+    </Dialog>
 
       <Dialog open={showAssignDialog} onOpenChange={handleCloseDialog}>
         <DialogContent className="sm:max-w-[600px]">
@@ -404,7 +464,7 @@ export default function RoomAllocationsPage({ rooms }: { rooms: RoomAllocation[]
                     </TableCell>
                   </TableRow>
                 ) : (
-                  allocatedSatsangies.map((s,index) => (
+                  allocatedSatsangies.map((s, index) => (
                     <TableRow key={s.id}>
                       <TableCell>{index + 1}</TableCell>
                       <TableCell>{s.name}</TableCell>

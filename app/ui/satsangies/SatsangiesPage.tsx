@@ -89,7 +89,6 @@ export default function SatsangiesPage({
   });
 
   filtered = filtered.filter((s) => {
-
     if (filterMode === 'checkedIn') return s.checked_in && !s.checked_out;
     if (filterMode === 'checkedOut') return s.checked_out;
     if (filterMode === 'unallocated') return !s.room_no;
@@ -278,9 +277,42 @@ export default function SatsangiesPage({
           </div>
         </div>
       </div>
+
+
       {/* Summary Section (after table, before buttons) */}
       <div className="bg-gray-100 rounded-lg p-4 mt-4 shadow flex flex-wrap gap-6 justify-between text-sm md:text-base">
-
+        <span className="font-semibold text-blue-800 capitalize flex items-center gap-2">
+          {filterMode === "all" && (
+            <>
+              <Users className="w-5 h-5 text-blue-800" />
+              All
+            </>
+          )}
+          {filterMode === "checkedIn" && (
+            <>
+              <LogIn className="w-5 h-5 text-indigo-800" />
+              Checked In
+            </>
+          )}
+          {filterMode === "checkedOut" && (
+            <>
+              <LogOut className="w-5 h-5 text-amber-800" />
+              Checked Out
+            </>
+          )}
+          {filterMode === "unallocated" && (
+            <>
+              <DoorClosed className="w-5 h-5 text-red-800" />
+              Unallocated
+            </>
+          )}
+          {filterMode === "unregistered" && (
+            <>
+              <XCircleIcon className="w-5 h-5 text-red-800" />
+              Unregistered
+            </>
+          )}
+        </span>
         {/* Show All */}
         <div
           className="flex items-center gap-1 cursor-pointer"
@@ -317,7 +349,7 @@ export default function SatsangiesPage({
           <DoorClosed className={`w-6 h-6 ${filterMode === 'unallocated' ? "text-red-800" : "text-gray-500"}`} />
         </div>
 
-          {/* UnRegistered  */}
+        {/* UnRegistered  */}
         <div
           className="flex items-center gap-1 cursor-pointer"
           title="Not Registered (payment_id is 99999)"
@@ -447,7 +479,7 @@ export default function SatsangiesPage({
                     type="number"
                     required
                     defaultValue={editingSatsangi.age}
-                    
+
                   />
                 </div>
                 <div>

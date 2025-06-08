@@ -118,7 +118,12 @@ export default function RoomsPage({
       {showForm && (
         <form
           action={async (formData) => {
-            await createRoom(formData);
+            try {
+              await createRoom(formData);
+            } catch (error) {
+              toast.error('Failed to add room: ' + (error instanceof Error ? error.message : 'Unknown error'));
+              return;
+            }
             toast.success('Room added!');
             setShowForm(false);
           }}
@@ -128,7 +133,7 @@ export default function RoomsPage({
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="room_type_id" className="mb-1 block">Room Type</Label>
+              {/* <Label htmlFor="room_type_id" className="mb-1 block">Room Type</Label> */}
               <Select name="room_type_id" required>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select Room Type" />
