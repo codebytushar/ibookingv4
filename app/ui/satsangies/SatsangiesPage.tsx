@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Users, LogIn, LogOut, DoorClosed, Pencil, XCircleIcon } from "lucide-react"; // DoorClosed for unallocated
+import { Users, LogIn, LogOut, DoorClosed, Pencil, XCircleIcon, Trash2 } from "lucide-react"; // DoorClosed for unallocated
 import {
   Table,
   TableBody,
@@ -27,10 +27,12 @@ import { Satsangi } from '@/app/datatypes/schema';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
+const ADMIN_PASSWORD = "GolokDham1007";
 export default function SatsangiesPage({
   satsangies,
   shivirs,
@@ -52,7 +54,27 @@ export default function SatsangiesPage({
     if (editingSatsangi && editingSatsangi.checked_out) return "checkout";
     return "clear";
   });
+  const [password, setPassword] = useState('');
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [selectedDeleteId, setSelectedDeleteId] = useState<number | null>(null);
+  const handleConfirmDelete = async () => {
+    if (password !== ADMIN_PASSWORD) {
+      toast.error("Incorrect password");
+      return;
+    }
 
+    setShowPasswordDialog(false);
+    setPassword('');
+
+    try {
+      if (!selectedDeleteId) return;
+      await deleteSatsangi(selectedDeleteId.toString());
+      toast.success("Satsangi deleted successfully.");
+      window.location.reload();
+    } catch (err) {
+      toast.error("Failed to delete satsangi.");
+    }
+  };
   const handleEditClick = (satsangi: Satsangi) => {
     setEditingSatsangi({
       ...satsangi,
@@ -151,7 +173,7 @@ export default function SatsangiesPage({
                 <TableHead onClick={() => handleSort("payment_id")} className="text-white cursor-pointer">
                   Payment ID {sortField === "payment_id" ? (sortDirection === "asc" ? "↑" : "↓") : ""}
                 </TableHead>
-                <TableHead className="text-white">CI/CO</TableHead>
+                <TableHead className="text-white">Actions</TableHead>
               </TableRow>
             </TableHeader>
 
@@ -167,36 +189,31 @@ export default function SatsangiesPage({
                   <TableCell>{s.payment_id ?? '-'}</TableCell>
                   <TableCell>
                     <div className="flex gap-4">
-                      {s.checked_out ? (
-                        <span className="text-gray-500 italic">Checked out</span>
-                      ) : (
-                        <>
-
-                          {!s.checked_in && (
-                            <button
-                              onClick={async () => {
-                                await checkInSatsangi(s.satsangi_id);
-                                toast.success("Checked In");
-                              }}
-                              className="text-indigo-600 hover:text-indigo-800"
-                            >
-                              <LogIn className="w-4 h-4" />
-                            </button>
-                          )}
-                          {s.checked_in && (
-                            <button
-                              onClick={async () => {
-                                await checkOutSatsangi(s.satsangi_id);
-                                toast.success("Checked Out");
-                              }}
-                              className="text-amber-600 hover:text-amber-800"
-                            >
-                              <LogOut className="w-4 h-4" />
-                            </button>
-                          )}
-
-                        </>
+                      {!s.checked_in && !s.checked_out && (
+                        <button
+                          onClick={async () => {
+                            await checkInSatsangi(s.satsangi_id);
+                            toast.success("Checked In");
+                          }}
+                          className="text-indigo-600 hover:text-indigo-800"
+                          title='Check In'
+                        >
+                          <LogIn className="w-4 h-4" />
+                        </button>
                       )}
+                      {s.checked_in && !s.checked_out && (
+                        <button
+                          onClick={async () => {
+                            await checkOutSatsangi(s.satsangi_id);
+                            toast.success("Checked Out");
+                          }}
+                          className="text-amber-600 hover:text-amber-800"
+                          title='Check Out'
+                        >
+                          <LogOut className="w-4 h-4" />
+                        </button>
+                      )}
+
                       <button
                         onClick={() => handleEditClick(s)}
                         className="text-blue-600 hover:text-blue-800"
@@ -204,7 +221,19 @@ export default function SatsangiesPage({
                       >
                         <Pencil className="w-4 h-4" />
                       </button>
+
+                      <button
+                        onClick={() => {
+                          setSelectedDeleteId(s.satsangi_id);
+                          setShowPasswordDialog(true);
+                        }}
+                        className="text-red-600 hover:text-red-800"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
+
 
 
                   </TableCell>
@@ -281,35 +310,46 @@ export default function SatsangiesPage({
 
       {/* Summary Section (after table, before buttons) */}
       <div className="bg-gray-100 rounded-lg p-4 mt-4 shadow flex flex-wrap gap-6 justify-between text-sm md:text-base">
-        <span className="font-semibold text-blue-800 capitalize flex items-center gap-2">
+        <span className="font-semibold  capitalize flex items-center gap-2">
           {filterMode === "all" && (
             <>
-              <Users className="w-5 h-5 text-blue-800" />
-              All
+              <Users className="w-5 h-5 text-rose-950" />
+              <span className="text-rose-950 font-bold">
+                All
+              </span>
             </>
           )}
           {filterMode === "checkedIn" && (
             <>
-              <LogIn className="w-5 h-5 text-indigo-800" />
-              Checked In
+              <LogIn className="w-5 h-5 text-indigo-950" />
+              <span className="text-indigo-950 font-bold">
+                Checked In
+              </span>
             </>
           )}
           {filterMode === "checkedOut" && (
             <>
-              <LogOut className="w-5 h-5 text-amber-800" />
-              Checked Out
+              <LogOut className="w-5 h-5 text-fuchsia-950" />
+              <span className="text-fuchsia-950 font-bold">
+                Checked Out
+              </span>
             </>
           )}
           {filterMode === "unallocated" && (
             <>
-              <DoorClosed className="w-5 h-5 text-red-800" />
-              Unallocated
+              <DoorClosed className="w-5 h-5 text-pink-950" />
+              <span className="text-pink-950 font-bold">
+                UnAllocated
+              </span>
             </>
           )}
           {filterMode === "unregistered" && (
             <>
-              <XCircleIcon className="w-5 h-5 text-red-800" />
-              Unregistered
+              <XCircleIcon className="w-5 h-5 text-red-950" />
+               <span className="text-red-950 font-bold">
+                Unregistered
+               </span>
+              
             </>
           )}
         </span>
@@ -319,7 +359,7 @@ export default function SatsangiesPage({
           title="Show All"
           onClick={() => setFilterMode('all')}
         >
-          <Users className={`w-6 h-6 ${filterMode === 'all' ? "text-blue-800" : "text-gray-500"}`} />
+          <Users className={`w-6 h-6 ${filterMode === 'all' ? "text-rose-950" : "text-rose-700"}`} />
         </div>
 
         {/* Checked In */}
@@ -328,7 +368,7 @@ export default function SatsangiesPage({
           title="Checked In"
           onClick={() => setFilterMode('checkedIn')}
         >
-          <LogIn className={`w-6 h-6 ${filterMode === 'checkedIn' ? "text-indigo-800" : "text-amber-600"}`} />
+          <LogIn className={`w-6 h-6 ${filterMode === 'checkedIn' ? "text-indigo-950" : "text-indigo-800"}`} />
         </div>
 
         {/* Checked Out */}
@@ -337,7 +377,7 @@ export default function SatsangiesPage({
           title="Checked Out"
           onClick={() => setFilterMode('checkedOut')}
         >
-          <LogOut className={`w-6 h-6 ${filterMode === 'checkedOut' ? "text-amber-800" : "text-indigo-600"}`} />
+          <LogOut className={`w-6 h-6 ${filterMode === 'checkedOut' ? "text-fuchsia-950" : "text-fuchsia-800"}`} />
         </div>
 
         {/* Unallocated */}
@@ -346,7 +386,7 @@ export default function SatsangiesPage({
           title="Unallocated (No Room)"
           onClick={() => setFilterMode('unallocated')}
         >
-          <DoorClosed className={`w-6 h-6 ${filterMode === 'unallocated' ? "text-red-800" : "text-gray-500"}`} />
+          <DoorClosed className={`w-6 h-6 ${filterMode === 'unallocated' ? "text-pink-950" : "text-pink-800"}`} />
         </div>
 
         {/* UnRegistered  */}
@@ -355,7 +395,7 @@ export default function SatsangiesPage({
           title="Not Registered (payment_id is 99999)"
           onClick={() => setFilterMode('unregistered')}
         >
-          <XCircleIcon className={`w-6 h-6 ${filterMode === 'unregistered' ? "text-red-800" : "text-gray-500"}`} />
+          <XCircleIcon className={`w-6 h-6 ${filterMode === 'unregistered' ? "text-red-950" : "text-red-800"}`} />
         </div>
 
 
@@ -440,6 +480,33 @@ export default function SatsangiesPage({
           <SatsangiesImport shivirs={shivirs} />
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>Please enter the admin password to delete this satsangi.</DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              type="password"
+              placeholder="Admin password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPasswordDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmDelete} disabled={!password}>
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Edit Dialog */}
       <Dialog open={!!editingSatsangi} onOpenChange={() => setEditingSatsangi(null)}>
