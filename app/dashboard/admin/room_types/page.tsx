@@ -2,7 +2,7 @@
 
 import { getAllRoomTypes } from './data';
 import { getAllRoomProperties } from '@/app/dashboard/admin/room_properties/data';
-import RoomTypesPage from '@/app/ui/room_types/RoomTypesPage';
+import RoomTypesPage from '@/app/ui/admin/room_types/RoomTypesPage';
 
 export default async function Page() {
   const roomTypes = await getAllRoomTypes();

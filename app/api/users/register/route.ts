@@ -9,10 +9,10 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await bcrypt.hash('xyz', 10);
 
     // Insert into users table
-    // await sql`
-    //   INSERT INTO users (id, name, email, password,role)
-    //   VALUES (${userId}, 'Nehal Damania','nehaldamania@gmail.com', ${hashedPassword},'admin')
-    // `;
+    await sql`
+      INSERT INTO users (id, name, email, password,role)
+      VALUES (${userId}, 'Booking Volunteer','volunteer@golokdham.in', ${hashedPassword},'volunteer')
+    `;
         
 
 

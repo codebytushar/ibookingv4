@@ -1,7 +1,7 @@
 'use server';
 
 import { getAllRooms, getAllRoomTypeOptions } from './data';
-import RoomsPage from '@/app/ui/rooms/RoomsPage';
+import RoomsPage from '@/app/ui/admin/rooms/RoomsPage';
 
 export default async function Page() {
   const roomsRaw = await getAllRooms();

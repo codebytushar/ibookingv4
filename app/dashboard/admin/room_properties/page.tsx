@@ -1,7 +1,7 @@
 'use server';
 
 import { getAllRoomProperties, getAllShivirIds } from './data';
-import RoomPropertiesPage from '@/app/ui/room_properties/RoomPropertiesPage'; // Adjust the import path as necessary
+import RoomPropertiesPage from '@/app/ui/admin/room_properties/RoomPropertiesPage'; // Adjust the import path as necessary
 
 export default async function Page() {
   const properties = await getAllRoomProperties();

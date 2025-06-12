@@ -1,9 +1,9 @@
 // app/(protected)/layout.tsx
 'use client';
 
-import Header from '@/app/ui/dashboard/Header';
-import Sidebar from '@/app/ui/dashboard/Sidebar';
-import Footer from '@/app/ui/dashboard/Footer';
+import Header from '@/app/ui/admin/dashboard/Header';
+import Sidebar from '@/app/ui/admin/dashboard/Sidebar';
+import Footer from '@/app/ui/admin/dashboard/Footer';
 import { ReactNode } from 'react';
 
 export default function Layout({ children }: { children: ReactNode }) {

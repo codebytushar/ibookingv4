@@ -2,7 +2,7 @@
 'use server';
 
 import { getRoomsWithAllocations } from './data'
-import RoomAllocationPage from '@/app/ui/admin/allocations/RoomAllocationPage';
+import RoomAllocationPage from '@/app/ui/volunteer/allocations/RoomAllocationPage';
 export default async function Page() {
 const rooms = await getRoomsWithAllocations();
 const flatRooms = rooms.flat();

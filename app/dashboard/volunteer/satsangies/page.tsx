@@ -1,7 +1,7 @@
 'use server';
 
 import { getAllSatsangieswithRoomNo, getAllShivirIds } from './data';
-import SatsangiesPage from '@/app/ui/admin/satsangies/SatsangiesPage';
+import SatsangiesPage from '@/app/ui/volunteer/satsangies/SatsangiesPage';
 
 export default async function Page() {
   const satsangies = await getAllSatsangieswithRoomNo();
