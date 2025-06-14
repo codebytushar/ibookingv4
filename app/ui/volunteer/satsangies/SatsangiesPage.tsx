@@ -19,7 +19,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Satsangi } from '@/app/datatypes/schema';
 
 export default function SatsangiesPage({
   satsangies,
